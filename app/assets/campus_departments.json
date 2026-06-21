@@ -1,0 +1,40 @@
+{
+    "Faisalabad/Chiniot": [
+        "Software Engineering",
+        "Financial Sciences & Management",
+        "Computer Science",
+        "Sciences & Humanities",
+        "Artificial Intelligence",
+        "Electrical Engineering",
+        "Civil Engineering"
+    ],
+    "Lahore": [
+        "Financial Sciences & Management",
+        "Computer Science",
+        "Sciences & Humanities",
+        "Electrical Engineering",
+        "Civil Engineering"
+    ],
+    "Karachi": [
+        "Software Engineering",
+        "Computer Science",
+        "Sciences & Humanities",
+        "Artificial Intelligence",
+        "Management Sciences",
+        "Cyber Security",
+        "Electrical Engineering"
+    ],
+    "Islamabad": [
+        "Artificial Intelligence & Data Science",
+        "Computer Science",
+        "Sciences & Humanities",
+        "Management Sciences",
+        "Computer Engineering",
+        "Electrical Engineering"
+    ],
+    "Peshawar": [
+        "Electrical Engineering",
+        "Computer Science",
+        "Sciences & Humanities"
+    ]
+}

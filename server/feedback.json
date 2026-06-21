@@ -1,0 +1,20 @@
+[
+  {
+    "id": "912ec681-742b-4870-be6d-0eb43e7287ed",
+    "name": "Test Student",
+    "rollNumber": "20I-0001",
+    "email": "test@gmail.com",
+    "category": "Suggestion",
+    "message": "This is a test feedback message to verify SMTP settings.",
+    "timestamp": "2026-06-16T03:02:12.395Z"
+  },
+  {
+    "id": "a74b9373-55d6-49a0-a724-d6834af571c1",
+    "name": "Muhammad Umer",
+    "rollNumber": "23L-3038",
+    "email": "N/A",
+    "category": "Suggestion",
+    "message": "your app is superb",
+    "timestamp": "2026-06-16T03:02:54.755Z"
+  }
+]
