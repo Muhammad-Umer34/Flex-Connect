@@ -82,23 +82,12 @@ class _UniversityLoginWebViewScreenState
               return;
             }
 
-            if (_isMarksPage(url)) {
-              if (!_marksCaptured) {
-                final captured = await _waitForMarksAndCapture();
-                if (captured) {
-                  _marksCaptured = true;
-                  await _navigateToTranscriptPage();
-                }
-              }
-              return;
-            }
-
             if (_isTranscriptPage(url)) {
               if (!_transcriptCaptured) {
                 final captured = await _waitForTranscriptAndCapture();
                 if (captured) {
                   _transcriptCaptured = true;
-                  await _closeWebView();
+                  await _resolveLatestSemesterAndNavigateToAttendance();
                 }
               }
               return;
@@ -110,6 +99,17 @@ class _UniversityLoginWebViewScreenState
                 if (captured) {
                   _attendanceCaptured = true;
                   await _navigateToMarksPage();
+                }
+              }
+              return;
+            }
+
+            if (_isMarksPage(url)) {
+              if (!_marksCaptured) {
+                final captured = await _waitForMarksAndCapture();
+                if (captured) {
+                  _marksCaptured = true;
+                  await _closeWebView();
                 }
               }
               return;
@@ -132,7 +132,7 @@ class _UniversityLoginWebViewScreenState
                   break;
                 }
 
-                await Future<void>.delayed(const Duration(milliseconds: 500));
+                await Future<void>.delayed(const Duration(milliseconds: 300));
               }
 
               if (attendanceUrl == null) {
@@ -142,15 +142,8 @@ class _UniversityLoginWebViewScreenState
 
               _dashboardCaptured = true;
 
-              if (!_hasNavigatedToAttendance) {
-                _hasNavigatedToAttendance = true;
-                final prefs = await SharedPreferences.getInstance();
-                final semId = prefs.getString('flex_selected_sync_semester');
-                final targetUrl = semId != null
-                    ? _modifyUrlSemester(attendanceUrl, semId)
-                    : attendanceUrl;
-                widget.onSyncProgress?.call('Loading attendance page...');
-                await _controller.loadRequest(Uri.parse(targetUrl));
+              if (!_hasNavigatedToTranscript) {
+                await _navigateToTranscriptPage();
               } else {
                 await _closeWebView();
               }
@@ -182,6 +175,57 @@ class _UniversityLoginWebViewScreenState
   bool _isMarksPage(String url) => url.contains('/Student/StudentMarks');
 
   bool _isTranscriptPage(String url) => url.contains('/Student/Transcript');
+
+  Future<void> _resolveLatestSemesterAndNavigateToAttendance() async {
+    if (_hasNavigatedToAttendance) {
+      await _closeWebView();
+      return;
+    }
+
+    _hasNavigatedToAttendance = true;
+    final prefs = await SharedPreferences.getInstance();
+
+    // Inspect stored transcript to find latest semester name (e.g., "Fall 2024")
+    String? latestSemId = prefs.getString('flex_selected_sync_semester');
+    final transcriptRaw = prefs.getString(_transcriptDataKey);
+    if (transcriptRaw != null && transcriptRaw.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(transcriptRaw);
+        if (decoded is Map<String, dynamic> && decoded['semesters'] is List) {
+          final sems = decoded['semesters'] as List;
+          if (sems.isNotEmpty) {
+            final lastSem = sems.last;
+            if (lastSem is Map<String, dynamic>) {
+              final semName = (lastSem['name'] as String? ?? '').trim();
+              final parts = semName.split(RegExp(r'\s+'));
+              if (parts.length == 2) {
+                final term = parts[0].toLowerCase();
+                final yr = int.tryParse(parts[1]);
+                if (yr != null) {
+                  int tCode = 3;
+                  if (term.contains('spring')) {
+                    tCode = 1;
+                  } else if (term.contains('summer')) {
+                    tCode = 2;
+                  }
+                  latestSemId = '$yr$tCode';
+                  await prefs.setString('flex_selected_sync_semester', latestSemId);
+                }
+              }
+            }
+          }
+        }
+      } catch (_) {}
+    }
+
+    final attendanceUrl = prefs.getString('student_link_attendance') ?? 'https://flexstudent.nu.edu.pk/Student/StudentAttendance';
+    final targetUrl = latestSemId != null
+        ? _modifyUrlSemester(attendanceUrl, latestSemId)
+        : attendanceUrl;
+
+    widget.onSyncProgress?.call('Loading latest attendance page...');
+    await _controller.loadRequest(Uri.parse(targetUrl));
+  }
 
   Future<void> _navigateToMarksPage() async {
     if (_hasNavigatedToMarks) {
