@@ -248,6 +248,7 @@ class MoreScreen extends StatelessWidget {
                 },
                 showDivider: true,
               ),
+              _buildAutoSyncSettingTile(context, isDark: isDark),
               _buildModernTile(
                 context: context,
                 icon: Icons.logout_rounded,
@@ -298,6 +299,97 @@ class MoreScreen extends StatelessWidget {
           const SizedBox(height: 32),
         ],
       ),
+    );
+  }
+
+  Widget _buildAutoSyncSettingTile(BuildContext context, {required bool isDark}) {
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return FutureBuilder<SharedPreferences>(
+          future: SharedPreferences.getInstance(),
+          builder: (context, snapshot) {
+            final prefs = snapshot.data;
+            final isAutoSyncEnabled = prefs?.getBool('auto_sync_on_launch') ?? false;
+
+            return Column(
+              children: [
+                Material(
+                  color: Colors.transparent,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? const Color(0xFF2563EB).withValues(alpha: 0.12)
+                                : const Color(0xFF2563EB).withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Center(
+                            child: Icon(
+                              Icons.autorenew_rounded,
+                              color: Color(0xFF2563EB),
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const [
+                              Text(
+                                'Auto-sync on Launch',
+                                style: TextStyle(
+                                  fontSize: 14.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF0F172A),
+                                  letterSpacing: -0.2,
+                                ),
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                'Sync portal automatically on app open',
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  color: Color(0xFF6B7280),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                        Switch.adaptive(
+                          value: isAutoSyncEnabled,
+                          activeColor: const Color(0xFF2563EB),
+                          onChanged: (value) async {
+                            if (prefs != null) {
+                              await prefs.setBool('auto_sync_on_launch', value);
+                              setState(() {});
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 68),
+                  child: Divider(
+                    height: 1,
+                    thickness: 1,
+                    color: isDark ? Colors.white.withValues(alpha: 0.04) : const Color(0xFFF1F5F9),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 

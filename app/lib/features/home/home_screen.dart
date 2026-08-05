@@ -261,13 +261,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
 
   String _getDefaultSemesterCode(String? rollNumber) {
-    if (rollNumber != null && rollNumber.isNotEmpty) {
-      final cleanRoll = rollNumber.trim();
-      if (cleanRoll.length >= 2) {
-        final yrPart = int.tryParse(cleanRoll.substring(0, 2));
-        if (yrPart != null) {
-          final yr = 2000 + yrPart;
-          return '${yr}3'; // Term 3 is Fall
+    if (_transcriptSnapshot != null && _transcriptSnapshot!.semesters.isNotEmpty) {
+      final lastSem = _transcriptSnapshot!.semesters.last.name.trim();
+      final parts = lastSem.split(RegExp(r'\s+'));
+      if (parts.length == 2) {
+        final term = parts[0].toLowerCase();
+        final yr = int.tryParse(parts[1]);
+        if (yr != null) {
+          int tCode = 3;
+          if (term.contains('spring')) {
+            tCode = 1;
+          } else if (term.contains('summer')) {
+            tCode = 2;
+          }
+          return '$yr$tCode';
         }
       }
     }
@@ -365,6 +372,16 @@ class _HomeScreenState extends State<HomeScreen> {
       _isLoading = false;
       _recomputeCachedValues();
     });
+
+    // Check for Auto-sync on startup preference
+    final isAutoSyncEnabled = preferences.getBool('auto_sync_on_launch') ?? false;
+    if (isAutoSyncEnabled && !_isSyncing) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _openUniversityLogin();
+        }
+      });
+    }
   }
 
   Future<Map<String, String>?> _readStoredCredentials() async {

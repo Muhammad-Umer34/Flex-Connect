@@ -115,15 +115,6 @@ class _AppEntryState extends State<AppEntry> {
       jsonEncode({'roll_number': rollNumber, 'password': password}),
     );
 
-    // Initialize default sync semester code based on the student's batch year Fall
-    if (rollNumber.length >= 2) {
-      final yrPart = int.tryParse(rollNumber.substring(0, 2));
-      if (yrPart != null) {
-        final yr = 2000 + yrPart;
-        await preferences.setString('flex_selected_sync_semester', '${yr}3');
-      }
-    }
-
     if (!mounted) {
       return;
     }
