@@ -373,9 +373,11 @@ class _HomeScreenState extends State<HomeScreen> {
       _recomputeCachedValues();
     });
 
-    // Check for Auto-sync on startup preference
+    // Check if user has zero cached data (First-time user after entering credentials)
+    final hasZeroData = !_hasAnyData;
     final isAutoSyncEnabled = preferences.getBool('auto_sync_on_launch') ?? false;
-    if (isAutoSyncEnabled && !_isSyncing) {
+
+    if ((hasZeroData || isAutoSyncEnabled) && !_isSyncing) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           _openUniversityLogin();

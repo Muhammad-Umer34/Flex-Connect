@@ -6,7 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 class UpdateService {
   UpdateService._();
 
-  static const String currentVersion = '1.0.4';
+  static const String currentVersion = '1.0.6';
   static bool _hasCheckedForUpdates = false;
 
   static Future<void> checkForUpdates(BuildContext context) async {
@@ -170,7 +170,7 @@ class UpdateService {
                     child: SingleChildScrollView(
                       physics: const BouncingScrollPhysics(),
                       child: Text(
-                        releaseNotes,
+                        _cleanMarkdownFormatting(releaseNotes),
                         style: TextStyle(
                           fontSize: 12,
                           height: 1.4,
@@ -226,5 +226,16 @@ class UpdateService {
         );
       },
     );
+  }
+
+  static String _cleanMarkdownFormatting(String text) {
+    if (text.isEmpty) return text;
+    return text
+        .replaceAll(RegExp(r'#+\s*'), '')
+        .replaceAll(RegExp(r'\*\*([^*]+)\*\*'), r'\1')
+        .replaceAll(RegExp(r'\*([^*]+)\*'), r'\1')
+        .replaceAll(RegExp(r'`([^`]+)`'), r'\1')
+        .replaceAll(RegExp(r'^\s*[-*]\s+', multiLine: true), '• ')
+        .trim();
   }
 }
