@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class UpdateService {
   UpdateService._();
 
+  static const String currentVersion = '1.0.9';
   static bool _hasCheckedForUpdates = false;
 
   static Future<void> checkForUpdates(BuildContext context) async {
@@ -14,8 +14,7 @@ class UpdateService {
     _hasCheckedForUpdates = true;
 
     try {
-      final packageInfo = await PackageInfo.fromPlatform();
-      final installedVersion = packageInfo.version.trim();
+      final installedVersion = currentVersion;
 
       final response = await http.get(
         Uri.parse('https://api.github.com/repos/Muhammad-Umer34/Flex-Connect-App/releases/latest'),

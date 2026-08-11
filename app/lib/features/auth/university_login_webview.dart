@@ -185,37 +185,39 @@ class _UniversityLoginWebViewScreenState
     _hasNavigatedToAttendance = true;
     final prefs = await SharedPreferences.getInstance();
 
-    // Inspect stored transcript to find latest semester name (e.g., "Fall 2024")
+    // Respect user-selected semester if already present. If missing, fall back to transcript latest semester.
     String? latestSemId = prefs.getString('flex_selected_sync_semester');
-    final transcriptRaw = prefs.getString(_transcriptDataKey);
-    if (transcriptRaw != null && transcriptRaw.isNotEmpty) {
-      try {
-        final decoded = jsonDecode(transcriptRaw);
-        if (decoded is Map<String, dynamic> && decoded['semesters'] is List) {
-          final sems = decoded['semesters'] as List;
-          if (sems.isNotEmpty) {
-            final lastSem = sems.last;
-            if (lastSem is Map<String, dynamic>) {
-              final semName = (lastSem['name'] as String? ?? '').trim();
-              final parts = semName.split(RegExp(r'\s+'));
-              if (parts.length == 2) {
-                final term = parts[0].toLowerCase();
-                final yr = int.tryParse(parts[1]);
-                if (yr != null) {
-                  int tCode = 3;
-                  if (term.contains('spring')) {
-                    tCode = 1;
-                  } else if (term.contains('summer')) {
-                    tCode = 2;
+    if (latestSemId == null || latestSemId.isEmpty) {
+      final transcriptRaw = prefs.getString(_transcriptDataKey);
+      if (transcriptRaw != null && transcriptRaw.isNotEmpty) {
+        try {
+          final decoded = jsonDecode(transcriptRaw);
+          if (decoded is Map<String, dynamic> && decoded['semesters'] is List) {
+            final sems = decoded['semesters'] as List;
+            if (sems.isNotEmpty) {
+              final lastSem = sems.last;
+              if (lastSem is Map<String, dynamic>) {
+                final semName = (lastSem['name'] as String? ?? '').trim();
+                final parts = semName.split(RegExp(r'\s+'));
+                if (parts.length == 2) {
+                  final term = parts[0].toLowerCase();
+                  final yr = int.tryParse(parts[1]);
+                  if (yr != null) {
+                    int tCode = 3;
+                    if (term.contains('spring')) {
+                      tCode = 1;
+                    } else if (term.contains('summer')) {
+                      tCode = 2;
+                    }
+                    latestSemId = '$yr$tCode';
+                    await prefs.setString('flex_selected_sync_semester', latestSemId);
                   }
-                  latestSemId = '$yr$tCode';
-                  await prefs.setString('flex_selected_sync_semester', latestSemId);
                 }
               }
             }
           }
-        }
-      } catch (_) {}
+        } catch (_) {}
+      }
     }
 
     final attendanceUrl = prefs.getString('student_link_attendance') ?? 'https://flexstudent.nu.edu.pk/Student/StudentAttendance';
