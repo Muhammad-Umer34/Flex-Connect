@@ -929,6 +929,35 @@ class _UniversityLoginWebViewScreenState
 
       final preferences = await SharedPreferences.getInstance();
       await preferences.setString(_transcriptDataKey, jsonEncode(decoded));
+
+      // Automatically populate flex_selected_sync_semester immediately if not set
+      final existingSem = preferences.getString('flex_selected_sync_semester');
+      if (existingSem == null || existingSem.isEmpty) {
+        if (decoded['semesters'] is List) {
+          final sems = decoded['semesters'] as List;
+          if (sems.isNotEmpty) {
+            final lastSem = sems.last;
+            if (lastSem is Map<String, dynamic>) {
+              final semName = (lastSem['name'] as String? ?? '').trim();
+              final parts = semName.split(RegExp(r'\s+'));
+              if (parts.length == 2) {
+                final term = parts[0].toLowerCase();
+                final yr = int.tryParse(parts[1]);
+                if (yr != null) {
+                  int tCode = 3;
+                  if (term.contains('spring')) {
+                    tCode = 1;
+                  } else if (term.contains('summer')) {
+                    tCode = 2;
+                  }
+                  final autoSemId = '$yr$tCode';
+                  await preferences.setString('flex_selected_sync_semester', autoSemId);
+                }
+              }
+            }
+          }
+        }
+      }
     } catch (_) {
       // Transcript content can render after the page finishes loading.
     }
