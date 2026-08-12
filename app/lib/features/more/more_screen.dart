@@ -67,6 +67,7 @@ class MoreScreen extends StatelessWidget {
                 
                 final preferences = await SharedPreferences.getInstance();
                 await preferences.clear();
+                MarksStorage.highlightedCoursesNotifier.value = [];
                 
                 if (context.mounted) {
                   RestartWidget.restartApp(context);

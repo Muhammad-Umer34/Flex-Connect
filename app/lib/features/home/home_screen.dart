@@ -469,6 +469,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 
                 final preferences = await SharedPreferences.getInstance();
                 await preferences.clear();
+                MarksStorage.highlightedCoursesNotifier.value = [];
                 
                 if (!mounted) return;
                 RestartWidget.restartApp(context);
