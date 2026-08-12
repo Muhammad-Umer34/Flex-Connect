@@ -279,16 +279,33 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     }
 
-    final now = DateTime.now();
-    final year = now.year;
-    final month = now.month;
-    if (month >= 1 && month <= 5) {
-      return '${year}1';
-    } else if (month >= 6 && month <= 7) {
-      return '${year}2';
-    } else {
-      return '${year}3';
+    // Infer from roll number if available (e.g. "23L-3038" -> joined Fall 2023)
+    if (rollNumber != null && rollNumber.isNotEmpty) {
+      final match = RegExp(r'^(\d{2})[A-Z]').firstMatch(rollNumber.trim().toUpperCase());
+      if (match != null) {
+        final startYearShort = int.tryParse(match.group(1)!);
+        if (startYearShort != null) {
+          final startYear = 2000 + startYearShort;
+          final now = DateTime.now();
+          // Calculate semester count assuming 2 semesters per year (Spring=1, Fall=3)
+          // For 23L in mid-2026: 2023 Fall (20233), 2024 Spring (20241), 2024 Fall (20243), 2025 Spring (20251), 2025 Fall (20253), 2026 Spring (20261)
+          // Current active semester is Spring 2026 (20261) until Fall classes actually start!
+          int currentYear = now.year;
+          // Spring is active semester 1 until Fall registration/classes begin around Sept/Oct
+          int activeTermCode = (now.month >= 9) ? 3 : 1;
+          if (now.month < 9 && activeTermCode == 1) {
+            // Spring semester of current year
+            return '${currentYear}1';
+          } else if (now.month >= 9) {
+            return '${currentYear}3';
+          }
+        }
+      }
     }
+
+    final now = DateTime.now();
+    // Default to Spring of current year if before September, otherwise Fall
+    return now.month >= 9 ? '${now.year}3' : '${now.year}1';
   }
 
 

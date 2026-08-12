@@ -185,47 +185,14 @@ class _UniversityLoginWebViewScreenState
     _hasNavigatedToAttendance = true;
     final prefs = await SharedPreferences.getInstance();
 
-    // Respect user-selected semester if already present. If missing, fall back to transcript latest semester.
-    String? latestSemId = prefs.getString('flex_selected_sync_semester');
-    if (latestSemId == null || latestSemId.isEmpty) {
-      final transcriptRaw = prefs.getString(_transcriptDataKey);
-      if (transcriptRaw != null && transcriptRaw.isNotEmpty) {
-        try {
-          final decoded = jsonDecode(transcriptRaw);
-          if (decoded is Map<String, dynamic> && decoded['semesters'] is List) {
-            final sems = decoded['semesters'] as List;
-            if (sems.isNotEmpty) {
-              final lastSem = sems.last;
-              if (lastSem is Map<String, dynamic>) {
-                final semName = (lastSem['name'] as String? ?? '').trim();
-                final parts = semName.split(RegExp(r'\s+'));
-                if (parts.length == 2) {
-                  final term = parts[0].toLowerCase();
-                  final yr = int.tryParse(parts[1]);
-                  if (yr != null) {
-                    int tCode = 3;
-                    if (term.contains('spring')) {
-                      tCode = 1;
-                    } else if (term.contains('summer')) {
-                      tCode = 2;
-                    }
-                    latestSemId = '$yr$tCode';
-                    await prefs.setString('flex_selected_sync_semester', latestSemId);
-                  }
-                }
-              }
-            }
-          }
-        } catch (_) {}
-      }
-    }
-
+    // Use the active selected semester set on the Home Screen
+    String? semId = prefs.getString('flex_selected_sync_semester');
     final attendanceUrl = prefs.getString('student_link_attendance') ?? 'https://flexstudent.nu.edu.pk/Student/StudentAttendance';
-    final targetUrl = latestSemId != null
-        ? _modifyUrlSemester(attendanceUrl, latestSemId)
+    final targetUrl = (semId != null && semId.isNotEmpty)
+        ? _modifyUrlSemester(attendanceUrl, semId)
         : attendanceUrl;
 
-    widget.onSyncProgress?.call('Loading latest attendance page...');
+    widget.onSyncProgress?.call('Loading attendance page...');
     await _controller.loadRequest(Uri.parse(targetUrl));
   }
 
@@ -239,7 +206,7 @@ class _UniversityLoginWebViewScreenState
     final prefs = await SharedPreferences.getInstance();
     final semId = prefs.getString('flex_selected_sync_semester');
     var marksUrl = _marksUrl ?? await _readStoredMarksUrl() ?? 'https://flexstudent.nu.edu.pk/Student/StudentMarks';
-    if (semId != null) {
+    if (semId != null && semId.isNotEmpty) {
       marksUrl = _modifyUrlSemester(marksUrl, semId);
     }
     widget.onSyncProgress?.call('Loading course marks page...');
@@ -930,26 +897,29 @@ class _UniversityLoginWebViewScreenState
       final preferences = await SharedPreferences.getInstance();
       await preferences.setString(_transcriptDataKey, jsonEncode(decoded));
 
-      // Populate flex_selected_sync_semester automatically from transcript
-      if (decoded['semesters'] is List) {
-        final sems = decoded['semesters'] as List;
-        if (sems.isNotEmpty) {
-          final lastSem = sems.last;
-          if (lastSem is Map<String, dynamic>) {
-            final semName = (lastSem['name'] as String? ?? '').trim();
-            final parts = semName.split(RegExp(r'\s+'));
-            if (parts.length == 2) {
-              final term = parts[0].toLowerCase();
-              final yr = int.tryParse(parts[1]);
-              if (yr != null) {
-                int tCode = 3;
-                if (term.contains('spring')) {
-                  tCode = 1;
-                } else if (term.contains('summer')) {
-                  tCode = 2;
+      // Populate flex_selected_sync_semester automatically from transcript ONLY if user has not selected one yet
+      final existingSem = preferences.getString('flex_selected_sync_semester');
+      if (existingSem == null || existingSem.isEmpty) {
+        if (decoded['semesters'] is List) {
+          final sems = decoded['semesters'] as List;
+          if (sems.isNotEmpty) {
+            final lastSem = sems.last;
+            if (lastSem is Map<String, dynamic>) {
+              final semName = (lastSem['name'] as String? ?? '').trim();
+              final parts = semName.split(RegExp(r'\s+'));
+              if (parts.length == 2) {
+                final term = parts[0].toLowerCase();
+                final yr = int.tryParse(parts[1]);
+                if (yr != null) {
+                  int tCode = 3;
+                  if (term.contains('spring')) {
+                    tCode = 1;
+                  } else if (term.contains('summer')) {
+                    tCode = 2;
+                  }
+                  final autoSemId = '$yr$tCode';
+                  await preferences.setString('flex_selected_sync_semester', autoSemId);
                 }
-                final autoSemId = '$yr$tCode';
-                await preferences.setString('flex_selected_sync_semester', autoSemId);
               }
             }
           }
