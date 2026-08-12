@@ -325,7 +325,9 @@ class _HomeScreenState extends State<HomeScreen> {
     var savedSemCode = preferences.getString('flex_selected_sync_semester');
     if (savedSemCode == null && transcriptSnapshot != null && transcriptSnapshot.semesters.isNotEmpty) {
       savedSemCode = _getDefaultSemesterCode(savedRollNumber);
-      await preferences.setString('flex_selected_sync_semester', savedSemCode);
+      if (savedSemCode != null) {
+        await preferences.setString('flex_selected_sync_semester', savedSemCode);
+      }
     }
 
     if (!mounted) {
