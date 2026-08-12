@@ -157,22 +157,8 @@ class _HomeScreenState extends State<HomeScreen> {
       // Sort in descending order of code (latest semester first)
       options.sort((a, b) => int.parse(b['code']!).compareTo(int.parse(a['code']!)));
     } else {
-      // Build dropdown options for first-time users (no transcript)
-      final defaultCode = _getDefaultSemesterCode(_rollNumber);
-      if (defaultCode.length >= 5) {
-        final yrStr = defaultCode.substring(0, 4);
-        final termChar = defaultCode.substring(4);
-        final yr = int.tryParse(yrStr) ?? DateTime.now().year;
-        String termName = 'Fall';
-        if (termChar == '1') {
-          termName = 'Spring';
-        } else if (termChar == '2') {
-          termName = 'Summer';
-        }
-        options.add({'name': '$termName $yr', 'code': defaultCode});
-      } else {
-        options.add({'name': 'Fall ${DateTime.now().year}', 'code': '${DateTime.now().year}3'});
-      }
+      // First-time users before sync: show a generic loading placeholder
+      options.add({'name': 'Latest Semester', 'code': ''});
     }
     _cachedSemesterOptions = options;
 
@@ -260,7 +246,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
 
 
-  String _getDefaultSemesterCode(String? rollNumber) {
+  String? _getDefaultSemesterCode(String? rollNumber) {
     if (_transcriptSnapshot != null && _transcriptSnapshot!.semesters.isNotEmpty) {
       final lastSem = _transcriptSnapshot!.semesters.last.name.trim();
       final parts = lastSem.split(RegExp(r'\s+'));
@@ -278,30 +264,7 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       }
     }
-
-    // Infer from roll number if available (e.g. "23L-3038" -> joined Fall 2023)
-    if (rollNumber != null && rollNumber.isNotEmpty) {
-      final match = RegExp(r'^(\d{2})[A-Z]').firstMatch(rollNumber.trim().toUpperCase());
-      if (match != null) {
-        final startYearShort = int.tryParse(match.group(1)!);
-        if (startYearShort != null) {
-          final now = DateTime.now();
-          int currentYear = now.year;
-          // Spring is active semester 1 until Fall registration/classes begin around Sept/Oct
-          int activeTermCode = (now.month >= 9) ? 3 : 1;
-          if (now.month < 9 && activeTermCode == 1) {
-            // Spring semester of current year
-            return '${currentYear}1';
-          } else if (now.month >= 9) {
-            return '${currentYear}3';
-          }
-        }
-      }
-    }
-
-    final now = DateTime.now();
-    // Default to Spring of current year if before September, otherwise Fall
-    return now.month >= 9 ? '${now.year}3' : '${now.year}1';
+    return null;
   }
 
 
