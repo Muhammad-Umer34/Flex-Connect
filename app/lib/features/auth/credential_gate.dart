@@ -24,6 +24,7 @@ class _AppEntryState extends State<AppEntry> {
   bool _isLoading = true;
   bool _hasCredentials = false;
   bool _isSaving = false;
+  bool _obscurePassword = true;
 
   @override
   void initState() {
@@ -292,8 +293,21 @@ class _AppEntryState extends State<AppEntry> {
                                 TextFormField(
                                   controller: _passwordController,
                                   style: TextStyle(color: isDark ? Colors.white : const Color(0xFF0F172A)),
-                                  decoration: _buildInputDecoration('Enter your password', isDark),
-                                  obscureText: true,
+                                  decoration: _buildInputDecoration('Enter your password', isDark).copyWith(
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                                        color: isDark ? Colors.white70 : const Color(0xFF64748B),
+                                        size: 20,
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          _obscurePassword = !_obscurePassword;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                  obscureText: _obscurePassword,
                                   validator: _validatePassword,
                                 ),
                                 const SizedBox(height: 28),
