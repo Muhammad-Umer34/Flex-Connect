@@ -16,8 +16,8 @@ class TranscriptScreenState extends State<TranscriptScreen> {
   final Set<int> _expandedIndices = {};
 
   static const Color _accent = Color(0xFF2563EB); // Royal Blue
-  static const Color _ink = Color(0xFF0F172A); // Dark Slate
-  static const Color _muted = Color(0xFF6B7280); // Cool Gray
+  Color get _ink => Theme.of(context).brightness == Brightness.dark ? const Color(0xFFF1F5F9) : const Color(0xFF0F172A);
+  Color get _muted => Theme.of(context).brightness == Brightness.dark ? const Color(0xFF94A3B8) : const Color(0xFF6B7280);
 
   @override
   void initState() {
@@ -46,7 +46,7 @@ class TranscriptScreenState extends State<TranscriptScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         bottom: false,
         child: _isLoading
@@ -85,15 +85,18 @@ class TranscriptScreenState extends State<TranscriptScreen> {
   }
 
   Widget _buildAcademicTranscriptHeader(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color: const Color(0xFFEFF6FF),
+            color: isDark ? const Color(0xFF2563EB).withValues(alpha: 0.15) : const Color(0xFFEFF6FF),
             borderRadius: BorderRadius.circular(6),
-            border: Border.all(color: const Color(0xFFBFDBFE), width: 1),
+            border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFBFDBFE), width: 1),
           ),
           child: const Icon(
             Icons.receipt_long_outlined,
@@ -102,10 +105,10 @@ class TranscriptScreenState extends State<TranscriptScreen> {
           ),
         ),
         const SizedBox(width: 8),
-        const Text(
+        Text(
           'Academic Transcript',
           style: TextStyle(
-            color: Color(0xFF1E3A8A),
+            color: isDark ? const Color(0xFF93C5FD) : const Color(0xFF1E3A8A),
             fontSize: 14,
             fontWeight: FontWeight.w600,
           ),
@@ -119,7 +122,7 @@ class TranscriptScreenState extends State<TranscriptScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Transcript Record',
           style: TextStyle(
             color: _ink,
@@ -154,7 +157,7 @@ class TranscriptScreenState extends State<TranscriptScreen> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'CUMULATIVE CGPA',
               style: TextStyle(
                 color: _muted,
@@ -179,7 +182,7 @@ class TranscriptScreenState extends State<TranscriptScreen> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'SEMESTERS',
               style: TextStyle(
                 color: _muted,
@@ -191,8 +194,8 @@ class TranscriptScreenState extends State<TranscriptScreen> {
             const SizedBox(height: 6),
             Text(
               '$semestersCount',
-              style: const TextStyle(
-                color: Color(0xFF1E293B),
+              style: TextStyle(
+                color: _ink,
                 fontSize: 44,
                 fontWeight: FontWeight.w400,
                 letterSpacing: -0.5,
@@ -204,7 +207,7 @@ class TranscriptScreenState extends State<TranscriptScreen> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'TOTAL COURSES',
               style: TextStyle(
                 color: _muted,
@@ -216,8 +219,8 @@ class TranscriptScreenState extends State<TranscriptScreen> {
             const SizedBox(height: 6),
             Text(
               '$totalCourses',
-              style: const TextStyle(
-                color: Color(0xFF6B7280),
+              style: TextStyle(
+                color: _muted,
                 fontSize: 44,
                 fontWeight: FontWeight.w400,
                 letterSpacing: -0.5,
@@ -271,19 +274,22 @@ class _SemesterTranscriptCard extends StatelessWidget {
   final bool isExpanded;
   final VoidCallback onTap;
 
-  static const Color _ink = Color(0xFF0F172A);
-  static const Color _muted = Color(0xFF6B7280);
-  static const Color _containerBg = Color(0xFFF8FAFC);
-  static const Color _containerBorder = Color(0xFFF1F5F9);
-
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? const Color(0xFFF1F5F9) : const Color(0xFF0F172A);
+    final muted = isDark ? const Color(0xFF94A3B8) : const Color(0xFF6B7280);
+    final containerBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final cardBg = isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC);
+    final containerBorder = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+    final dividerColor = isDark ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFF1F5F9);
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: _containerBg,
+        color: cardBg,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: _containerBorder, width: 1),
+        border: Border.all(color: containerBorder, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -301,8 +307,8 @@ class _SemesterTranscriptCard extends StatelessWidget {
                       children: [
                         Text(
                           semester.name.isNotEmpty ? semester.name : 'Semester',
-                          style: const TextStyle(
-                            color: _ink,
+                          style: TextStyle(
+                            color: ink,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             height: 1.25,
@@ -313,15 +319,15 @@ class _SemesterTranscriptCard extends StatelessWidget {
                           Row(
                             children: [
                               if (semester.sgpa != null) ...[
-                                _buildMiniStat('SGPA', semester.sgpa!),
+                                _buildMiniStat(ink, muted, 'SGPA', semester.sgpa!),
                                 const SizedBox(width: 24),
                               ],
                               if (semester.cgpa != null) ...[
-                                _buildMiniStat('CGPA', semester.cgpa!),
+                                _buildMiniStat(ink, muted, 'CGPA', semester.cgpa!),
                                 const SizedBox(width: 24),
                               ],
                               if (semester.creditsEarned != null) ...[
-                                _buildMiniStat('CREDITS', semester.creditsEarned!),
+                                _buildMiniStat(ink, muted, 'CREDITS', semester.creditsEarned!),
                               ],
                             ],
                           ),
@@ -333,7 +339,7 @@ class _SemesterTranscriptCard extends StatelessWidget {
                     isExpanded
                         ? Icons.keyboard_arrow_up_rounded
                         : Icons.keyboard_arrow_down_rounded,
-                    color: _muted,
+                    color: muted,
                     size: 18,
                   ),
                 ],
@@ -341,29 +347,29 @@ class _SemesterTranscriptCard extends StatelessWidget {
             ),
           ),
           if (isExpanded) ...[
-            const Divider(color: _containerBorder, height: 1),
+            Divider(color: containerBorder, height: 1),
             Container(
               width: double.infinity,
-              color: Colors.white,
+              color: containerBg,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               child: semester.courses.isEmpty
-                  ? const Padding(
-                      padding: EdgeInsets.all(16),
+                  ? Padding(
+                      padding: const EdgeInsets.all(16),
                       child: Text(
                         'No course rows were captured for this semester.',
-                        style: TextStyle(color: _muted, fontSize: 12),
+                        style: TextStyle(color: muted, fontSize: 12),
                       ),
                     )
                   : Column(
                       children: [
                         _TranscriptTableHeader(),
                         const SizedBox(height: 6),
-                        const Divider(color: Color(0xFFF1F5F9), height: 1),
+                        Divider(color: dividerColor, height: 1),
                         const SizedBox(height: 10),
                         for (var index = 0; index < semester.courses.length; index++) ...[
                           if (index > 0) ...[
                             const SizedBox(height: 14),
-                            const Divider(color: Color(0xFFF1F5F9), height: 1),
+                            Divider(color: dividerColor, height: 1),
                             const SizedBox(height: 14),
                           ],
                           _TranscriptCourseRow(
@@ -379,14 +385,14 @@ class _SemesterTranscriptCard extends StatelessWidget {
     );
   }
 
-  Widget _buildMiniStat(String label, String value) {
+  Widget _buildMiniStat(Color ink, Color muted, String label, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label.toUpperCase(),
-          style: const TextStyle(
-            color: _muted,
+          style: TextStyle(
+            color: muted,
             fontSize: 9,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.5,
@@ -395,8 +401,8 @@ class _SemesterTranscriptCard extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           value.isNotEmpty ? value : '-',
-          style: const TextStyle(
-            color: _ink,
+          style: TextStyle(
+            color: ink,
             fontSize: 13,
             fontWeight: FontWeight.w700,
           ),
@@ -409,14 +415,17 @@ class _SemesterTranscriptCard extends StatelessWidget {
 class _TranscriptTableHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final muted = isDark ? const Color(0xFF94A3B8) : const Color(0xFF6B7280);
+
     return Row(
-      children: const [
+      children: [
         SizedBox(
           width: 70,
           child: Text(
             'CODE',
             style: TextStyle(
-              color: Color(0xFF6B7280),
+              color: muted,
               fontSize: 9,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.5,
@@ -426,11 +435,11 @@ class _TranscriptTableHeader extends StatelessWidget {
         Expanded(
           flex: 4,
           child: Padding(
-            padding: EdgeInsets.only(right: 8),
+            padding: const EdgeInsets.only(right: 8),
             child: Text(
               'COURSE NAME',
               style: TextStyle(
-                color: Color(0xFF6B7280),
+                color: muted,
                 fontSize: 9,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.5,
@@ -444,7 +453,7 @@ class _TranscriptTableHeader extends StatelessWidget {
             'GRADE',
             textAlign: TextAlign.left,
             style: TextStyle(
-              color: Color(0xFF6B7280),
+              color: muted,
               fontSize: 9,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.5,
@@ -457,7 +466,7 @@ class _TranscriptTableHeader extends StatelessWidget {
             'POINTS',
             textAlign: TextAlign.left,
             style: TextStyle(
-              color: Color(0xFF6B7280),
+              color: muted,
               fontSize: 9,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.5,
@@ -474,11 +483,12 @@ class _TranscriptCourseRow extends StatelessWidget {
 
   final TranscriptCourse course;
 
-  static const Color _ink = Color(0xFF0F172A);
-  static const Color _muted = Color(0xFF6B7280);
-
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? const Color(0xFFF1F5F9) : const Color(0xFF0F172A);
+    final muted = isDark ? const Color(0xFF94A3B8) : const Color(0xFF6B7280);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -489,8 +499,8 @@ class _TranscriptCourseRow extends StatelessWidget {
               width: 70,
               child: Text(
                 course.code.isNotEmpty ? course.code : '-',
-                style: const TextStyle(
-                  color: _ink,
+                style: TextStyle(
+                  color: ink,
                   fontWeight: FontWeight.w600,
                   fontSize: 13,
                 ),
@@ -502,8 +512,8 @@ class _TranscriptCourseRow extends StatelessWidget {
                 padding: const EdgeInsets.only(right: 8),
                 child: Text(
                   course.courseName.isNotEmpty ? course.courseName : '-',
-                  style: const TextStyle(
-                    color: _ink,
+                  style: TextStyle(
+                    color: ink,
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
                     height: 1.25,
@@ -516,8 +526,8 @@ class _TranscriptCourseRow extends StatelessWidget {
               child: Text(
                 course.grade.isNotEmpty ? course.grade : '-',
                 textAlign: TextAlign.left,
-                style: const TextStyle(
-                  color: _ink,
+                style: TextStyle(
+                  color: ink,
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
                 ),
@@ -551,8 +561,8 @@ class _TranscriptCourseRow extends StatelessWidget {
                 if (course.type.isNotEmpty) course.type,
                 if (course.remarks.isNotEmpty) course.remarks,
               ].join('   •   '),
-              style: const TextStyle(
-                color: _muted,
+              style: TextStyle(
+                color: muted,
                 fontSize: 10,
                 fontWeight: FontWeight.w500,
               ),
@@ -569,27 +579,31 @@ class _EmptyTranscriptState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? const Color(0xFFF1F5F9) : const Color(0xFF0F172A);
+    final muted = isDark ? const Color(0xFF94A3B8) : const Color(0xFF6B7280);
+
     return Column(
       children: [
-        const Icon(
+        Icon(
           Icons.receipt_long_outlined,
           size: 52,
-          color: Color(0xFF6B7280),
+          color: muted,
         ),
         const SizedBox(height: 16),
         Text(
           'No transcript data captured yet.',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: const Color(0xFF0F172A),
+                color: ink,
                 fontWeight: FontWeight.w700,
               ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 8),
-        const Text(
+        Text(
           'Open the university login sync again to capture the transcript page.',
           textAlign: TextAlign.center,
-          style: TextStyle(color: Color(0xFF6B7280), height: 1.4),
+          style: TextStyle(color: muted, height: 1.4),
         ),
       ],
     );

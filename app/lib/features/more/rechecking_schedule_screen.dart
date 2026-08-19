@@ -9,6 +9,7 @@ import '../../models/timetable_models.dart';
 import '../../services/pdf_schedule_parser.dart';
 import '../../services/transcript_storage.dart';
 import '../../widgets/custom_toast.dart';
+import '../../utils/calendar_utils.dart';
 
 class RecheckingScheduleScreen extends StatefulWidget {
   const RecheckingScheduleScreen({super.key});
@@ -371,42 +372,59 @@ class _RecheckingScheduleScreenState extends State<RecheckingScheduleScreen> {
           ),
         ),
         if (_events != null)
-          IconButton(
-            icon: Icon(Icons.refresh, color: isDark ? Colors.grey[400] : _muted),
-            tooltip: 'Upload New PDFs',
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
-                  title: Text(
-                    'Reset Extractor',
-                    style: TextStyle(color: isDark ? Colors.white : _ink),
-                  ),
-                  content: Text(
-                    'Are you sure you want to reset and upload different schedules?',
-                    style: TextStyle(color: isDark ? Colors.grey[300] : _muted),
-                  ),
-                  actions: [
-                    TextButton(
-                      child: const Text('Cancel'),
-                      onPressed: () => Navigator.pop(context),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: Icon(Icons.calendar_today_rounded, color: isDark ? Colors.grey[400] : _muted),
+                tooltip: 'Export to Google Calendar',
+                onPressed: _exportToCalendar,
+              ),
+              IconButton(
+                icon: Icon(Icons.refresh, color: isDark ? Colors.grey[400] : _muted),
+                tooltip: 'Upload New PDFs',
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+                      title: Text(
+                        'Reset Extractor',
+                        style: TextStyle(color: isDark ? Colors.white : _ink),
+                      ),
+                      content: Text(
+                        'Are you sure you want to reset and upload different schedules?',
+                        style: TextStyle(color: isDark ? Colors.grey[300] : _muted),
+                      ),
+                      actions: [
+                        TextButton(
+                          child: const Text('Cancel'),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        TextButton(
+                          style: TextButton.styleFrom(foregroundColor: Colors.red),
+                          onPressed: () {
+                            Navigator.pop(context);
+                            _resetScreen();
+                          },
+                          child: const Text('Reset'),
+                        ),
+                      ],
                     ),
-                    TextButton(
-                      style: TextButton.styleFrom(foregroundColor: Colors.red),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _resetScreen();
-                      },
-                      child: const Text('Reset'),
-                    ),
-                  ],
-                ),
-              );
-            },
+                  );
+                },
+              ),
+            ],
           ),
       ],
     );
+  }
+
+  Future<void> _exportToCalendar() async {
+    if (_events == null || _events!.isEmpty) return;
+
+    final icsContent = CalendarUtils.generateRecheckingIcs(_events!);
+    await CalendarUtils.exportAndShare(context, icsContent, 'rechecking_schedule.ics');
   }
 
   Widget _buildTitle(bool isDark) {

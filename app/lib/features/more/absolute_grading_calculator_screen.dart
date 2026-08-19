@@ -17,10 +17,15 @@ class _AbsoluteGradingCalculatorScreenState
   Color _gradeColor = Colors.grey;
 
   static const Color _accent = Color(0xFF2563EB); // Royal Blue
-  static const Color _ink = Color(0xFF0F172A); // Dark Slate
-  static const Color _muted = Color(0xFF6B7280); // Cool Gray
-  static const Color _flatBg = Color(0xFFF8FAFC); // Slate 50
-  static const Color _flatBorder = Color(0xFFF1F5F9); // Slate 100
+
+  Color get _ink => Theme.of(context).brightness == Brightness.dark ? const Color(0xFFF1F5F9) : const Color(0xFF0F172A);
+  Color get _muted => Theme.of(context).brightness == Brightness.dark ? const Color(0xFF94A3B8) : const Color(0xFF6B7280);
+  Color get _flatBg => Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC);
+  Color get _flatBorder => Theme.of(context).brightness == Brightness.dark ? const Color(0xFF334155) : const Color(0xFFF1F5F9);
+  Color get _cardBg => Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1E293B) : Colors.white;
+  Color get _inputBorder => Theme.of(context).brightness == Brightness.dark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+  Color get _headerSub => Theme.of(context).brightness == Brightness.dark ? const Color(0xFF60A5FA) : const Color(0xFF1E3A8A);
+  Color get _iconBg => Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2563EB).withValues(alpha: 0.15) : const Color(0xFFEFF6FF);
 
   @override
   void initState() {
@@ -118,11 +123,11 @@ class _AbsoluteGradingCalculatorScreenState
               child: Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: _cardBg,
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+                  border: Border.all(color: _inputBorder, width: 1),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.arrow_back_rounded,
                   color: _ink,
                   size: 16,
@@ -133,9 +138,9 @@ class _AbsoluteGradingCalculatorScreenState
             Container(
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
-                color: const Color(0xFFEFF6FF),
+                color: _iconBg,
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: const Color(0xFFBFDBFE), width: 1),
+                border: Border.all(color: _accent.withValues(alpha: 0.3), width: 1),
               ),
               child: const Icon(
                 Icons.calculate_outlined,
@@ -144,10 +149,10 @@ class _AbsoluteGradingCalculatorScreenState
               ),
             ),
             const SizedBox(width: 8),
-            const Text(
+            Text(
               'Academic Utilities',
               style: TextStyle(
-                color: Color(0xFF1E3A8A),
+                color: _headerSub,
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
@@ -159,7 +164,7 @@ class _AbsoluteGradingCalculatorScreenState
   }
 
   Widget _buildTitleSection(BuildContext context) {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
@@ -171,11 +176,11 @@ class _AbsoluteGradingCalculatorScreenState
             letterSpacing: -0.5,
           ),
         ),
-        SizedBox(height: 6),
-        Text(
+        const SizedBox(height: 6),
+        const Text(
           'NUCES ABSOLUTE POLICY (SPRING 2020)',
           style: TextStyle(
-            color: Color(0xFFB45309),
+            color: Color(0xFFF59E0B),
             fontSize: 11,
             fontWeight: FontWeight.w700,
             letterSpacing: 1.5,
@@ -203,7 +208,7 @@ class _AbsoluteGradingCalculatorScreenState
     ];
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
@@ -228,7 +233,7 @@ class _AbsoluteGradingCalculatorScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'TOTAL COURSE SCORE (%)',
                       style: TextStyle(
                         fontSize: 10,
@@ -241,27 +246,27 @@ class _AbsoluteGradingCalculatorScreenState
                     TextField(
                       controller: _scoreController,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      style: const TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w500),
+                      style: TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w500),
                       decoration: InputDecoration(
                         hintText: 'Enter your total marks (e.g. 73.6)',
-                        hintStyle: const TextStyle(color: _muted, fontSize: 14, fontWeight: FontWeight.normal),
+                        hintStyle: TextStyle(color: _muted, fontSize: 14, fontWeight: FontWeight.normal),
                         prefixIcon: const Icon(Icons.percent, color: _accent, size: 18),
-                        fillColor: Colors.white,
+                        fillColor: _cardBg,
                         filled: true,
                         suffixIcon: _scoreController.text.isNotEmpty
                             ? IconButton(
-                                icon: const Icon(Icons.clear, color: _muted),
+                                icon: Icon(Icons.clear, color: _muted),
                                 onPressed: () => _scoreController.clear(),
                               )
                             : null,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                          borderSide: BorderSide(color: _inputBorder),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                          borderSide: BorderSide(color: _inputBorder),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -279,10 +284,10 @@ class _AbsoluteGradingCalculatorScreenState
                 Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: _grade == 'Invalid' ? const Color(0xFFFEF2F2) : _gradeColor.withValues(alpha: 0.05),
+                    color: _grade == 'Invalid' ? const Color(0xFFFEF2F2) : _gradeColor.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: _grade == 'Invalid' ? const Color(0xFFFCA5A5) : _gradeColor.withValues(alpha: 0.15),
+                      color: _grade == 'Invalid' ? const Color(0xFFFCA5A5) : _gradeColor.withValues(alpha: 0.25),
                       width: 1,
                     ),
                   ),
@@ -295,56 +300,56 @@ class _AbsoluteGradingCalculatorScreenState
                             const Expanded(
                               child: Text(
                                 'Please enter a valid percentage between 0 and 100.',
-                                style: TextStyle(
-                                  color: Color(0xFFB91C1C),
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 14,
-                                ),
+                                style: TextStyle(color: Color(0xFF991B1B), fontSize: 13),
                               ),
                             ),
                           ],
                         )
                       : Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Container(
-                              width: 64,
-                              height: 64,
-                              decoration: BoxDecoration(
-                                color: _gradeColor.withValues(alpha: 0.1),
-                                shape: BoxShape.circle,
-                                border: Border.all(color: _gradeColor.withValues(alpha: 0.2), width: 1),
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                _grade!,
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w800,
-                                  color: _gradeColor,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'ESTIMATED GRADE',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: _muted,
+                                    letterSpacing: 0.5,
+                                  ),
                                 ),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'CALCULATED GRADE',
-                                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: _muted),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Grade ${_grade!} assigned',
-                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _ink),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    'Obtained: ${_inputScore!.toStringAsFixed(1)}% (rounded to $_roundedScore%)',
-                                    style: const TextStyle(fontSize: 12, color: _muted),
-                                  ),
-                                ],
-                              ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Text(
+                                      _grade!,
+                                      style: TextStyle(
+                                        fontSize: 32,
+                                        fontWeight: FontWeight.bold,
+                                        color: _gradeColor,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: _gradeColor.withValues(alpha: 0.15),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        'Rounded to $_roundedScore%',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: _gradeColor,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -353,7 +358,7 @@ class _AbsoluteGradingCalculatorScreenState
               ],
 
               // Reference scale title
-              const Text(
+              Text(
                 'ABSOLUTE GRADING SCALE',
                 style: TextStyle(
                   fontSize: 11,
@@ -379,12 +384,12 @@ class _AbsoluteGradingCalculatorScreenState
                     ),
                     children: [
                       // Header Row
-                      const TableRow(
-                        decoration: BoxDecoration(color: Color(0xFFF8FAFC)),
+                      TableRow(
+                        decoration: BoxDecoration(color: _flatBg),
                         children: [
                           TableCell(
                             child: Padding(
-                              padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                               child: Text(
                                 'Total Marks (%)',
                                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: _ink),
@@ -393,7 +398,7 @@ class _AbsoluteGradingCalculatorScreenState
                           ),
                           TableCell(
                             child: Padding(
-                              padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                               child: Text(
                                 'Letter Grade',
                                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: _ink),
@@ -411,7 +416,7 @@ class _AbsoluteGradingCalculatorScreenState
                                 padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
                                 child: Text(
                                   row['range']!,
-                                  style: const TextStyle(fontSize: 13, color: _ink),
+                                  style: TextStyle(fontSize: 13, color: _ink),
                                 ),
                               ),
                             ),

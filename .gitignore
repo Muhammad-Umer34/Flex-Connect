@@ -1,0 +1,5 @@
+# Build & temporary files
+**/build/
+*.log
+*.tmp
+.DS_Store

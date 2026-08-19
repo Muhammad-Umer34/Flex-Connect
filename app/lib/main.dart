@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import 'features/auth/credential_gate.dart';
+import 'services/telemetry_service.dart';
+import 'services/home_widget_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,6 +15,10 @@ void main() async {
     url: url,
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ucWZyZXptamRkeXdoeWZnZ3R6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1MTMyMTUsImV4cCI6MjA5NzA4OTIxNX0.YaUELjWIMTPpXofArXNVkW0ZQDihE4DFI-zwBu3IMnc',
   );
+
+  // Trigger telemetry logging for already logged in users in the background
+  TelemetryService.recordLaunch();
+  HomeWidgetService.updateNextClassWidget();
 
   runApp(
     const RestartWidget(

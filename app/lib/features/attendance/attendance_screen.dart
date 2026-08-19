@@ -16,8 +16,8 @@ class AttendanceScreenState extends State<AttendanceScreen> {
   int? _expandedCourseIndex;
 
   static const Color _accent = Color(0xFF2563EB); // Royal Blue
-  static const Color _ink = Color(0xFF0F172A); // Dark Slate
-  static const Color _muted = Color(0xFF6B7280); // Cool Gray
+  Color get _ink => Theme.of(context).brightness == Brightness.dark ? const Color(0xFFF1F5F9) : const Color(0xFF0F172A);
+  Color get _muted => Theme.of(context).brightness == Brightness.dark ? const Color(0xFF94A3B8) : const Color(0xFF6B7280);
 
   @override
   void initState() {
@@ -52,7 +52,7 @@ class AttendanceScreenState extends State<AttendanceScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         bottom: false,
         child: _isLoading
@@ -97,15 +97,16 @@ class AttendanceScreenState extends State<AttendanceScreen> {
   }
 
   Widget _buildAcademicAttendanceHeader(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color: const Color(0xFFEFF6FF),
+            color: isDark ? const Color(0xFF2563EB).withValues(alpha: 0.15) : const Color(0xFFEFF6FF),
             borderRadius: BorderRadius.circular(6),
-            border: Border.all(color: const Color(0xFFBFDBFE), width: 1),
+            border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFBFDBFE), width: 1),
           ),
           child: const Icon(
             Icons.event_available_outlined,
@@ -114,10 +115,10 @@ class AttendanceScreenState extends State<AttendanceScreen> {
           ),
         ),
         const SizedBox(width: 8),
-        const Text(
+        Text(
           'Academic Attendance',
           style: TextStyle(
-            color: Color(0xFF1E3A8A),
+            color: isDark ? const Color(0xFF93C5FD) : const Color(0xFF1E3A8A),
             fontSize: 14,
             fontWeight: FontWeight.w600,
           ),
@@ -131,7 +132,7 @@ class AttendanceScreenState extends State<AttendanceScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Attendance Record',
           style: TextStyle(
             color: _ink,
@@ -166,7 +167,7 @@ class AttendanceScreenState extends State<AttendanceScreen> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'DANGER COURSES',
               style: TextStyle(
                 color: _muted,
@@ -191,7 +192,7 @@ class AttendanceScreenState extends State<AttendanceScreen> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'SUBJECTS',
               style: TextStyle(
                 color: _muted,
@@ -203,8 +204,8 @@ class AttendanceScreenState extends State<AttendanceScreen> {
             const SizedBox(height: 6),
             Text(
               '$coursesCount',
-              style: const TextStyle(
-                color: Color(0xFF1E293B),
+              style: TextStyle(
+                color: _ink,
                 fontSize: 44,
                 fontWeight: FontWeight.w400,
                 letterSpacing: -0.5,
@@ -216,7 +217,7 @@ class AttendanceScreenState extends State<AttendanceScreen> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'LECTURES',
               style: TextStyle(
                 color: _muted,
@@ -228,8 +229,8 @@ class AttendanceScreenState extends State<AttendanceScreen> {
             const SizedBox(height: 6),
             Text(
               '$totalLecturesCount',
-              style: const TextStyle(
-                color: Color(0xFF6B7280),
+              style: TextStyle(
+                color: _ink,
                 fontSize: 44,
                 fontWeight: FontWeight.w400,
                 letterSpacing: -0.5,
@@ -248,7 +249,7 @@ class AttendanceScreenState extends State<AttendanceScreen> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
-            children: const [
+            children: [
               Expanded(
                 flex: 4,
                 child: Text(
@@ -324,20 +325,23 @@ class _DangerCoursesBanner extends StatelessWidget {
 
   final List<AttendanceCourse> courses;
 
-  static const Color _ink = Color(0xFF0F172A);
-  static const Color _muted = Color(0xFF6B7280);
   static const Color _alertAccent = Color(0xFFD97706);
-  static const Color _alertBorder = Color(0xFFF1F5F9);
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final containerBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final containerBorder = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+    final ink = isDark ? const Color(0xFFF1F5F9) : const Color(0xFF0F172A);
+    final muted = isDark ? const Color(0xFF94A3B8) : const Color(0xFF6B7280);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: containerBg,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: _alertBorder, width: 1),
+        border: Border.all(color: containerBorder, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -347,7 +351,7 @@ class _DangerCoursesBanner extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFEF3C7),
+                  color: isDark ? const Color(0xFF78350F).withValues(alpha: 0.3) : const Color(0xFFFEF3C7),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: const Icon(
@@ -369,10 +373,10 @@ class _DangerCoursesBanner extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          const Text(
+          Text(
             'The following subjects require attention to maintain the minimum 80% attendance requirement:',
             style: TextStyle(
-              color: _muted,
+              color: muted,
               fontSize: 13,
               height: 1.4,
             ),
@@ -381,7 +385,7 @@ class _DangerCoursesBanner extends StatelessWidget {
           for (var i = 0; i < courses.length; i++) ...[
             if (i > 0) ...[
               const SizedBox(height: 10),
-              const Divider(color: Color(0xFFF1F5F9), height: 1),
+              Divider(color: isDark ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFF1F5F9), height: 1),
               const SizedBox(height: 10),
             ],
             Row(
@@ -389,8 +393,8 @@ class _DangerCoursesBanner extends StatelessWidget {
                 Expanded(
                   child: Text(
                     courses[i].displayTitle,
-                    style: const TextStyle(
-                      color: _ink,
+                    style: TextStyle(
+                      color: ink,
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
                     ),
@@ -424,13 +428,9 @@ class _CourseRow extends StatelessWidget {
   final bool isExpanded;
   final VoidCallback onTap;
 
-  static const Color _ink = Color(0xFF0F172A);
-  static const Color _muted = Color(0xFF6B7280);
   static const Color _present = Color(0xFF10B981);
   static const Color _late = Color(0xFFF59E0B);
   static const Color _absent = Color(0xFFEF4444);
-  static const Color _containerBg = Color(0xFFF8FAFC);
-  static const Color _containerBorder = Color(0xFFF1F5F9);
 
   Color _accentForPercentage(double percentage) {
     if (percentage >= AttendanceRow.dangerThresholdPercent) {
@@ -444,14 +444,20 @@ class _CourseRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? const Color(0xFFF1F5F9) : const Color(0xFF0F172A);
+    final muted = isDark ? const Color(0xFF94A3B8) : const Color(0xFF6B7280);
+    final containerBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final containerBorder = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+
     final accent = _accentForPercentage(course.attendancePercentage);
 
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: _containerBg,
+        color: containerBg,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: _containerBorder, width: 1),
+        border: Border.all(color: containerBorder, width: 1),
       ),
       child: Column(
         children: [
@@ -470,8 +476,8 @@ class _CourseRow extends StatelessWidget {
                       children: [
                         Text(
                           course.displayTitle,
-                          style: const TextStyle(
-                            color: _ink,
+                          style: TextStyle(
+                            color: ink,
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
                             height: 1.25,
@@ -481,8 +487,8 @@ class _CourseRow extends StatelessWidget {
                           const SizedBox(height: 4),
                           Text(
                             course.subtitle!,
-                            style: const TextStyle(
-                              color: _muted,
+                            style: TextStyle(
+                              color: muted,
                               fontSize: 11,
                               fontWeight: FontWeight.w500,
                             ),
@@ -496,8 +502,8 @@ class _CourseRow extends StatelessWidget {
                     child: Text(
                       '${course.attendedCount}/${course.totalLectures}',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Color(0xFF4B5563),
+                      style: TextStyle(
+                        color: ink,
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
                       ),
@@ -508,8 +514,8 @@ class _CourseRow extends StatelessWidget {
                     child: Text(
                       '${course.absentCount}',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Color(0xFF4B5563),
+                      style: TextStyle(
+                        color: ink,
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
                       ),
@@ -533,7 +539,7 @@ class _CourseRow extends StatelessWidget {
                           isExpanded
                               ? Icons.keyboard_arrow_up_rounded
                               : Icons.keyboard_arrow_down_rounded,
-                          color: _muted,
+                          color: muted,
                           size: 16,
                         ),
                       ],
@@ -544,7 +550,7 @@ class _CourseRow extends StatelessWidget {
             ),
           ),
           if (isExpanded) ...[
-            const Divider(color: _containerBorder, height: 1),
+            Divider(color: containerBorder, height: 1),
             _LectureList(rows: course.rows),
           ],
         ],
@@ -560,30 +566,35 @@ class _LectureList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color muted = isDark ? const Color(0xFF94A3B8) : const Color(0xFF6B7280);
+    final Color containerBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final Color dividerColor = isDark ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFF1F5F9);
+
     if (rows.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.all(16),
+      return Padding(
+        padding: const EdgeInsets.all(16),
         child: Text(
           'No lecture records for this course yet.',
-          style: TextStyle(color: Color(0xFF6B7280), fontSize: 12),
+          style: TextStyle(color: muted, fontSize: 12),
         ),
       );
     }
 
     return Container(
       width: double.infinity,
-      color: Colors.white,
+      color: containerBg,
       padding: const EdgeInsets.all(12),
       child: Column(
         children: [
           Row(
-            children: const [
+            children: [
               Expanded(
                 flex: 4,
                 child: Text(
                   'LECTURE',
                   style: TextStyle(
-                    color: Color(0xFF6B7280),
+                    color: muted,
                     fontSize: 9,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.5,
@@ -596,7 +607,7 @@ class _LectureList extends StatelessWidget {
                   'DURATION',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Color(0xFF6B7280),
+                    color: muted,
                     fontSize: 9,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.5,
@@ -609,7 +620,7 @@ class _LectureList extends StatelessWidget {
                   'STATUS',
                   textAlign: TextAlign.right,
                   style: TextStyle(
-                    color: Color(0xFF6B7280),
+                    color: muted,
                     fontSize: 9,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.5,
@@ -619,12 +630,12 @@ class _LectureList extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 6),
-          const Divider(color: Color(0xFFF1F5F9), height: 1),
+          Divider(color: dividerColor, height: 1),
           const SizedBox(height: 8),
           for (var i = 0; i < rows.length; i++) ...[
             if (i > 0) ...[
               const SizedBox(height: 10),
-              const Divider(color: Color(0xFFF1F5F9), height: 1),
+              Divider(color: dividerColor, height: 1),
               const SizedBox(height: 10),
             ],
             _LectureTile(row: rows[i]),
@@ -640,14 +651,16 @@ class _LectureTile extends StatelessWidget {
 
   final AttendanceRow row;
 
-  static const Color _ink = Color(0xFF0F172A);
-  static const Color _muted = Color(0xFF6B7280);
   static const Color _present = Color(0xFF10B981);
   static const Color _late = Color(0xFFF59E0B);
   static const Color _absent = Color(0xFFEF4444);
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color ink = isDark ? const Color(0xFFF1F5F9) : const Color(0xFF0F172A);
+    final Color muted = isDark ? const Color(0xFF94A3B8) : const Color(0xFF6B7280);
+
     final isPresent = row.isPresent;
     final isLate = row.isLate;
     final isAbsent = row.isAbsent;
@@ -657,7 +670,7 @@ class _LectureTile extends StatelessWidget {
         ? _late
         : isAbsent
         ? _absent
-        : _muted;
+        : muted;
     final statusLabel = row.statusLabel;
 
     return Row(
@@ -670,8 +683,8 @@ class _LectureTile extends StatelessWidget {
             children: [
               Text(
                 'Lecture ${row.lectureNo}',
-                style: const TextStyle(
-                  color: _ink,
+                style: TextStyle(
+                  color: ink,
                   fontWeight: FontWeight.w600,
                   fontSize: 13,
                 ),
@@ -679,8 +692,8 @@ class _LectureTile extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 row.date,
-                style: const TextStyle(
-                  color: _muted,
+                style: TextStyle(
+                  color: muted,
                   fontSize: 10,
                   fontWeight: FontWeight.w500,
                 ),
@@ -693,8 +706,8 @@ class _LectureTile extends StatelessWidget {
           child: Text(
             '${row.durationHours} hrs',
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: _ink,
+            style: TextStyle(
+              color: ink,
               fontSize: 13,
               fontWeight: FontWeight.w500,
             ),
@@ -722,27 +735,31 @@ class _EmptyAttendanceState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? const Color(0xFFF1F5F9) : const Color(0xFF0F172A);
+    final muted = isDark ? const Color(0xFF94A3B8) : const Color(0xFF6B7280);
+
     return Column(
       children: [
-        const Icon(
+        Icon(
           Icons.event_available_outlined,
           size: 52,
-          color: Color(0xFF6B7280),
+          color: muted,
         ),
         const SizedBox(height: 16),
         Text(
           'No attendance data captured yet.',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: const Color(0xFF0F172A),
+                color: ink,
                 fontWeight: FontWeight.w700,
               ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 8),
-        const Text(
+        Text(
           'Sync from the Home tab first so the attendance screen can load your latest subjects.',
           textAlign: TextAlign.center,
-          style: TextStyle(color: Color(0xFF6B7280), height: 1.4),
+          style: TextStyle(color: muted, height: 1.4),
         ),
       ],
     );

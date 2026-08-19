@@ -6,9 +6,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../navigation/main_screen.dart';
 import '../../services/update_service.dart';
+import 'onboarding_screen.dart';
 
 class AppEntry extends StatefulWidget {
   const AppEntry({super.key});
+
+  static final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier<ThemeMode>(ThemeMode.system);
 
   @override
   State<AppEntry> createState() => _AppEntryState();
@@ -23,6 +26,7 @@ class _AppEntryState extends State<AppEntry> {
 
   bool _isLoading = true;
   bool _hasCredentials = false;
+  bool _onboardingCompleted = false;
   bool _isSaving = false;
   bool _obscurePassword = true;
 
@@ -43,6 +47,16 @@ class _AppEntryState extends State<AppEntry> {
     final preferences = await SharedPreferences.getInstance();
     final storedCredentials = preferences.getString(credentialsKey);
     final hasCredentials = _isValidStoredCredentials(storedCredentials);
+    final onboardingCompleted = preferences.getBool('flex_onboarding_completed') ?? false;
+
+    final themeString = preferences.getString('app_theme') ?? 'system';
+    ThemeMode savedThemeMode = ThemeMode.system;
+    if (themeString == 'light') {
+      savedThemeMode = ThemeMode.light;
+    } else if (themeString == 'dark') {
+      savedThemeMode = ThemeMode.dark;
+    }
+    AppEntry.themeNotifier.value = savedThemeMode;
 
     if (!mounted) {
       return;
@@ -50,6 +64,7 @@ class _AppEntryState extends State<AppEntry> {
 
     setState(() {
       _hasCredentials = hasCredentials;
+      _onboardingCompleted = onboardingCompleted;
       _isLoading = false;
     });
   }
@@ -126,7 +141,7 @@ class _AppEntryState extends State<AppEntry> {
     });
   }
 
-  Widget _buildMaterialApp(Widget home) {
+  Widget _buildMaterialApp(Widget home, ThemeMode currentThemeMode) {
     return MaterialApp(
       title: 'Flex Connect',
       debugShowCheckedModeBanner: false,
@@ -139,31 +154,57 @@ class _AppEntryState extends State<AppEntry> {
           brightness: Brightness.light,
         ),
       ),
-      themeMode: ThemeMode.light,
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: const Color(0xFF0F172A),
+        primaryColor: const Color(0xFF2563EB),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF2563EB),
+          brightness: Brightness.dark,
+        ),
+      ),
+      themeMode: currentThemeMode,
       home: home,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return _buildMaterialApp(
-        const Scaffold(
-          body: Center(
-            child: CircularProgressIndicator(
-              color: Color(0xFF2563EB),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: AppEntry.themeNotifier,
+      builder: (context, currentMode, _) {
+        if (_isLoading) {
+          return _buildMaterialApp(
+            const Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(
+                  color: Color(0xFF2563EB),
+                ),
+              ),
             ),
-          ),
-        ),
-      );
-    }
+            currentMode,
+          );
+        }
 
-    if (_hasCredentials) {
-      return _buildMaterialApp(const MainScreen());
-    }
+        if (!_onboardingCompleted) {
+          return _buildMaterialApp(
+            OnboardingScreen(
+              onFinished: () {
+                setState(() {
+                  _onboardingCompleted = true;
+                });
+              },
+            ),
+            currentMode,
+          );
+        }
 
-    return _buildMaterialApp(
-      Scaffold(
+        if (_hasCredentials) {
+          return _buildMaterialApp(const MainScreen(), currentMode);
+        }
+
+        return _buildMaterialApp(
+          Scaffold(
         body: Builder(
           builder: (context) {
             final theme = Theme.of(context);
@@ -357,7 +398,10 @@ class _AppEntryState extends State<AppEntry> {
           },
         ),
       ),
+      currentMode,
     );
+  },
+);
   }
 
   Widget _buildLabel(String text, bool isDark) {

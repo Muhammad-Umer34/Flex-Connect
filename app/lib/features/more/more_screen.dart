@@ -7,9 +7,14 @@ import 'past_papers_screen.dart';
 import 'absolute_grading_calculator_screen.dart';
 import 'relative_grading_calculator_screen.dart';
 import 'faculty_review_screen.dart';
+import 'faculty_timetable_screen.dart';
+import 'free_room_finder_screen.dart';
 import 'rechecking_schedule_screen.dart';
 import 'datesheet_screen.dart';
 import 'feedback_screen.dart';
+import '../gpa/cgpa_roadmap_simulator_screen.dart';
+
+import '../auth/credential_gate.dart';
 
 class MoreScreen extends StatelessWidget {
   const MoreScreen({super.key});
@@ -172,6 +177,20 @@ class MoreScreen extends StatelessWidget {
                     MaterialPageRoute(builder: (context) => const RelativeGradingCalculatorScreen()),
                   );
                 },
+                showDivider: true,
+              ),
+              _buildModernTile(
+                context: context,
+                icon: Icons.auto_graph_rounded,
+                iconColor: const Color(0xFF2563EB),
+                title: 'Graduation CGPA Simulator',
+                subtitle: 'Simulate target SGPA needed for remaining semesters',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const CgpaRoadmapSimulatorScreen()),
+                  );
+                },
                 showDivider: false,
               ),
             ],
@@ -224,6 +243,34 @@ class MoreScreen extends StatelessWidget {
                     MaterialPageRoute(builder: (context) => const FacultyReviewScreen()),
                   );
                 },
+                showDivider: true,
+              ),
+              _buildModernTile(
+                context: context,
+                icon: Icons.location_on_rounded,
+                iconColor: const Color(0xFFEA580C),
+                title: 'Faculty Timetable Tracker',
+                subtitle: 'Find teachers and check their current status',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const FacultyTimetableScreen()),
+                  );
+                },
+                showDivider: true,
+              ),
+              _buildModernTile(
+                context: context,
+                icon: Icons.meeting_room_rounded,
+                iconColor: const Color(0xFF10B981),
+                title: 'Free Room Finder',
+                subtitle: 'Find empty classrooms and study spaces',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const FreeRoomFinderScreen()),
+                  );
+                },
                 showDivider: false,
               ),
             ],
@@ -251,6 +298,7 @@ class MoreScreen extends StatelessWidget {
                 showDivider: true,
               ),
               _buildAutoSyncSettingTile(context, isDark: isDark),
+              _buildThemeSettingTile(context, isDark: isDark),
               _buildModernTile(
                 context: context,
                 icon: Icons.logout_rounded,
@@ -264,43 +312,97 @@ class MoreScreen extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 24),
-
-          // Section: COMING SOON
-          _buildCategoryHeader(context, 'Coming Soon'),
-          const SizedBox(height: 8),
-          SizedBox(
-            height: 110,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              children: [
-                _buildComingSoonItem(
-                  context: context,
-                  icon: Icons.directions_bus_outlined,
-                  title: 'Bus Tracker',
-                  subtitle: 'Real-time university transport tracking',
-                ),
-                const SizedBox(width: 12),
-                _buildComingSoonItem(
-                  context: context,
-                  icon: Icons.event_note_outlined,
-                  title: 'Events Calendar',
-                  subtitle: 'Campus workshops and social events',
-                ),
-                const SizedBox(width: 12),
-                _buildComingSoonItem(
-                  context: context,
-                  icon: Icons.restaurant_menu_outlined,
-                  title: 'Cafeteria Pre-order',
-                  subtitle: 'Skip the queue & pre-order meals',
-                ),
-              ],
-            ),
-          ),
           const SizedBox(height: 32),
         ],
       ),
+    );
+  }
+
+  Widget _buildThemeSettingTile(BuildContext context, {required bool isDark}) {
+    return _buildModernTile(
+      context: context,
+      icon: Icons.palette_rounded,
+      iconColor: const Color(0xFF8B5CF6),
+      title: 'App Theme',
+      subtitle: 'Change appearance (System, Light, Dark)',
+      onTap: () => _showThemeSelectionDialog(context),
+      showDivider: true,
+    );
+  }
+
+  Future<void> _showThemeSelectionDialog(BuildContext context) async {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext dialogContext) {
+        return ValueListenableBuilder<ThemeMode>(
+          valueListenable: AppEntry.themeNotifier,
+          builder: (context, currentMode, _) {
+            return AlertDialog(
+              backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              title: const Text(
+                'Choose Theme',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildThemeOptionTile(dialogContext, 'System Default', ThemeMode.system, isDark),
+                  _buildThemeOptionTile(dialogContext, 'Light Mode', ThemeMode.light, isDark),
+                  _buildThemeOptionTile(dialogContext, 'Dark Mode', ThemeMode.dark, isDark),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildThemeOptionTile(BuildContext context, String title, ThemeMode mode, bool isDark) {
+    final currentMode = AppEntry.themeNotifier.value;
+    final isSelected = currentMode == mode;
+
+    return ListTile(
+      title: Text(
+        title,
+        style: TextStyle(
+          color: isDark ? Colors.white : const Color(0xFF0F172A),
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        ),
+      ),
+      subtitle: mode == ThemeMode.system
+          ? const Text(
+              'Matches your device light/dark appearance',
+              style: TextStyle(fontSize: 11, color: _muted),
+            )
+          : null,
+      trailing: isSelected
+          ? const Icon(Icons.check_circle_rounded, color: Color(0xFF2563EB))
+          : null,
+      onTap: () async {
+        Navigator.of(context).pop();
+
+        final prefs = await SharedPreferences.getInstance();
+        String themeStr = 'system';
+        if (mode == ThemeMode.light) {
+          themeStr = 'light';
+        } else if (mode == ThemeMode.dark) {
+          themeStr = 'dark';
+        }
+        await prefs.setString('app_theme', themeStr);
+
+        AppEntry.themeNotifier.value = mode;
+      },
     );
   }
 
@@ -342,22 +444,22 @@ class MoreScreen extends StatelessWidget {
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
+                            children: [
                               Text(
                                 'Auto-sync on Launch',
                                 style: TextStyle(
                                   fontSize: 14.5,
                                   fontWeight: FontWeight.w600,
-                                  color: Color(0xFF0F172A),
+                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
                                   letterSpacing: -0.2,
                                 ),
                               ),
-                              SizedBox(height: 2),
+                              const SizedBox(height: 2),
                               Text(
                                 'Sync portal automatically on app open',
                                 style: TextStyle(
                                   fontSize: 11.5,
-                                  color: Color(0xFF6B7280),
+                                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF6B7280),
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -539,94 +641,6 @@ class MoreScreen extends StatelessWidget {
             ),
           ),
       ],
-    );
-  }
-
-  Widget _buildComingSoonItem({
-    required BuildContext context,
-    required IconData icon,
-    required String title,
-    required String subtitle,
-  }) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Container(
-      width: 160,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E293B).withValues(alpha: 0.4) : Colors.white.withValues(alpha: 0.6),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: isDark ? Colors.white.withValues(alpha: 0.03) : const Color(0xFFE2E8F0).withValues(alpha: 0.7),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF0F172A).withValues(alpha: 0.3) : const Color(0xFFF1F5F9),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  icon,
-                  color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
-                  size: 18,
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2.5),
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF334155).withValues(alpha: 0.5) : const Color(0xFFE2E8F0),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  'SOON',
-                  style: TextStyle(
-                    fontSize: 8,
-                    fontWeight: FontWeight.bold,
-                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 1),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  fontSize: 10,
-                  color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
-                  height: 1.2,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 }

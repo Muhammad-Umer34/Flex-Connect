@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../services/marks_storage.dart';
+import '../../services/telemetry_service.dart';
 
 class UniversityLoginWebViewScreen extends StatefulWidget {
   const UniversityLoginWebViewScreen({
@@ -451,6 +452,7 @@ class _UniversityLoginWebViewScreenState
 
       if (extractedRoll is String && extractedRoll.isNotEmpty) {
         await preferences.setString('student_roll_number', extractedRoll);
+        TelemetryService.recordLaunch();
       }
       if (degree is String && degree.isNotEmpty) {
         await preferences.setString('student_degree', degree);
@@ -987,6 +989,9 @@ class _UniversityLoginWebViewScreenState
             });
           }
 
+          const alertElement = document.querySelector('.m-alert__text, .alert-danger, .alert');
+          const noRecordFound = alertElement && alertElement.textContent.includes('No Record Found');
+
           const tabsByPane = {};
           document.querySelectorAll(
             'a.m-tabs_link[href^="#"], .nav-tabs a[href^="#"], a[data-toggle="tab"][href^="#"]'
@@ -1102,6 +1107,7 @@ class _UniversityLoginWebViewScreenState
             capturedAt: new Date().toISOString(),
             selectedSemester,
             courses,
+            noRecordFound: !!noRecordFound,
           });
         })();
       ''');
@@ -1117,8 +1123,8 @@ class _UniversityLoginWebViewScreenState
       }
 
       final courses = decoded['courses'];
-      final hasCapturedMarks =
-          courses is List &&
+      final noRecordFound = decoded['noRecordFound'] == true;
+      final hasCapturedMarks = (courses is List &&
           courses.any((course) {
             if (course is! Map) {
               return false;
@@ -1137,7 +1143,7 @@ class _UniversityLoginWebViewScreenState
               final rows = section['rows'];
               return rows is List && rows.isNotEmpty;
             });
-          });
+          })) || noRecordFound;
 
       if (!hasCapturedMarks) {
         return false;
@@ -1442,29 +1448,26 @@ class _UniversityLoginWebViewScreenState
   Widget build(BuildContext context) {
     final sheetHeight = _sheetHeight(context);
 
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      child: Material(
-        color: Colors.white,
-        child: SizedBox(
-          height: sheetHeight,
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: Opacity(
-                  opacity: _isCaptchaReady ? 1 : 0,
-                  child: WebViewWidget(controller: _controller),
+    return Material(
+      color: Colors.white,
+      child: SizedBox(
+        height: sheetHeight,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: Opacity(
+                opacity: _isCaptchaReady ? 1 : 0,
+                child: WebViewWidget(controller: _controller),
+              ),
+            ),
+            if (!_isCaptchaReady)
+              const Positioned.fill(
+                child: ColoredBox(
+                  color: Colors.white,
+                  child: Center(child: CircularProgressIndicator()),
                 ),
               ),
-              if (!_isCaptchaReady)
-                const Positioned.fill(
-                  child: ColoredBox(
-                    color: Colors.white,
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
-                ),
-            ],
-          ),
+          ],
         ),
       ),
     );

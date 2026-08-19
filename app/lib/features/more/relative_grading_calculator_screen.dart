@@ -21,10 +21,15 @@ class _RelativeGradingCalculatorScreenState
   Color _gradeColor = Colors.grey;
 
   static const Color _accent = Color(0xFF0F766E); // Teal Accent
-  static const Color _ink = Color(0xFF0F172A); // Dark Slate
-  static const Color _muted = Color(0xFF6B7280); // Cool Gray
-  static const Color _flatBg = Color(0xFFF8FAFC); // Slate 50
-  static const Color _flatBorder = Color(0xFFF1F5F9); // Slate 100
+
+  Color get _ink => Theme.of(context).brightness == Brightness.dark ? const Color(0xFFF1F5F9) : const Color(0xFF0F172A);
+  Color get _muted => Theme.of(context).brightness == Brightness.dark ? const Color(0xFF94A3B8) : const Color(0xFF6B7280);
+  Color get _flatBg => Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC);
+  Color get _flatBorder => Theme.of(context).brightness == Brightness.dark ? const Color(0xFF334155) : const Color(0xFFF1F5F9);
+  Color get _cardBg => Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1E293B) : Colors.white;
+  Color get _inputBorder => Theme.of(context).brightness == Brightness.dark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+  Color get _headerSub => Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2DD4BF) : const Color(0xFF115E59);
+  Color get _iconBg => Theme.of(context).brightness == Brightness.dark ? const Color(0xFF0F766E).withValues(alpha: 0.15) : const Color(0xFFCCFBF1);
 
   // The NUCES Official Relative Grading Scheme Table (effective Spring 2020)
   // Maps Rounded MCA (30 to 91) to thresholds for:
@@ -260,11 +265,11 @@ class _RelativeGradingCalculatorScreenState
               child: Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: _cardBg,
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+                  border: Border.all(color: _inputBorder, width: 1),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.arrow_back_rounded,
                   color: _ink,
                   size: 16,
@@ -275,9 +280,9 @@ class _RelativeGradingCalculatorScreenState
             Container(
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
-                color: const Color(0xFFF0FDFA),
+                color: _iconBg,
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: const Color(0xFFCCFBF1), width: 1),
+                border: Border.all(color: _accent.withValues(alpha: 0.3), width: 1),
               ),
               child: const Icon(
                 Icons.analytics_outlined,
@@ -286,10 +291,10 @@ class _RelativeGradingCalculatorScreenState
               ),
             ),
             const SizedBox(width: 8),
-            const Text(
+            Text(
               'Academic Utilities',
               style: TextStyle(
-                color: Color(0xFF115E59),
+                color: _headerSub,
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
@@ -301,7 +306,7 @@ class _RelativeGradingCalculatorScreenState
   }
 
   Widget _buildTitleSection(BuildContext context) {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
@@ -313,11 +318,11 @@ class _RelativeGradingCalculatorScreenState
             letterSpacing: -0.5,
           ),
         ),
-        SizedBox(height: 6),
-        Text(
+        const SizedBox(height: 6),
+        const Text(
           'NUCES RELATIVE POLICY (SPRING 2020)',
           style: TextStyle(
-            color: Color(0xFFB45309),
+            color: Color(0xFFF59E0B),
             fontSize: 11,
             fontWeight: FontWeight.w700,
             letterSpacing: 1.5,
@@ -334,7 +339,7 @@ class _RelativeGradingCalculatorScreenState
     final ranges = _getGradeRanges(mcaForTable);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
@@ -360,7 +365,7 @@ class _RelativeGradingCalculatorScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // MCA Input
-                    const Text(
+                    Text(
                       'MEAN CLASS AVERAGE (MCA) (%)',
                       style: TextStyle(
                         fontSize: 10,
@@ -373,27 +378,27 @@ class _RelativeGradingCalculatorScreenState
                     TextField(
                       controller: _mcaController,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      style: const TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w500),
+                      style: TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w500),
                       decoration: InputDecoration(
                         hintText: 'Enter class average (e.g. 50.4)',
-                        hintStyle: const TextStyle(color: _muted, fontSize: 14, fontWeight: FontWeight.normal),
+                        hintStyle: TextStyle(color: _muted, fontSize: 14, fontWeight: FontWeight.normal),
                         prefixIcon: const Icon(Icons.people_outline, color: _accent, size: 18),
-                        fillColor: Colors.white,
+                        fillColor: _cardBg,
                         filled: true,
                         suffixIcon: _mcaController.text.isNotEmpty
                             ? IconButton(
-                                icon: const Icon(Icons.clear, color: _muted),
+                                icon: Icon(Icons.clear, color: _muted),
                                 onPressed: () => _mcaController.clear(),
                               )
                             : null,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                          borderSide: BorderSide(color: _inputBorder),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                          borderSide: BorderSide(color: _inputBorder),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -405,7 +410,7 @@ class _RelativeGradingCalculatorScreenState
                     const SizedBox(height: 20),
 
                     // Score Input
-                    const Text(
+                    Text(
                       'YOUR COURSE SCORE (%)',
                       style: TextStyle(
                         fontSize: 10,
@@ -418,27 +423,27 @@ class _RelativeGradingCalculatorScreenState
                     TextField(
                       controller: _scoreController,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      style: const TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w500),
+                      style: TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w500),
                       decoration: InputDecoration(
                         hintText: 'Enter your total marks (e.g. 62.6)',
-                        hintStyle: const TextStyle(color: _muted, fontSize: 14, fontWeight: FontWeight.normal),
+                        hintStyle: TextStyle(color: _muted, fontSize: 14, fontWeight: FontWeight.normal),
                         prefixIcon: const Icon(Icons.percent, color: _accent, size: 18),
-                        fillColor: Colors.white,
+                        fillColor: _cardBg,
                         filled: true,
                         suffixIcon: _scoreController.text.isNotEmpty
                             ? IconButton(
-                                icon: const Icon(Icons.clear, color: _muted),
+                                icon: Icon(Icons.clear, color: _muted),
                                 onPressed: () => _scoreController.clear(),
                               )
                             : null,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                          borderSide: BorderSide(color: _inputBorder),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                          borderSide: BorderSide(color: _inputBorder),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -449,49 +454,17 @@ class _RelativeGradingCalculatorScreenState
                   ],
                 ),
               ),
-
               const SizedBox(height: 20),
 
-              // Clamping Notice
-              if (showResult && _grade != 'Invalid' && (_inputMca! < 30 || _inputMca! > 91)) ...[
-                Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFEF3C7), // Amber 50
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFFFCD34D), width: 1),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.info_outline_rounded, color: Color(0xFFD97706), size: 18),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          _inputMca! < 30
-                              ? 'MCA Clamped: Class Average rounded to $_roundedMca is below 30. Displaying thresholds scaled at MCA = 30.'
-                              : 'MCA Clamped: Class Average rounded to $_roundedMca is above 91. Displaying thresholds scaled at MCA = 91.',
-                          style: const TextStyle(
-                            color: Color(0xFF92400E),
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
-              ],
-
               // Results box
-              if (showResult) ...[
+              if (_grade != null) ...[
                 Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: _grade == 'Invalid' ? const Color(0xFFFEF2F2) : _gradeColor.withValues(alpha: 0.05),
+                    color: _grade == 'Invalid' ? const Color(0xFFFEF2F2) : _gradeColor.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: _grade == 'Invalid' ? const Color(0xFFFCA5A5) : _gradeColor.withValues(alpha: 0.15),
+                      color: _grade == 'Invalid' ? const Color(0xFFFCA5A5) : _gradeColor.withValues(alpha: 0.25),
                       width: 1,
                     ),
                   ),
@@ -503,12 +476,8 @@ class _RelativeGradingCalculatorScreenState
                             const SizedBox(width: 12),
                             const Expanded(
                               child: Text(
-                                'Please enter valid percentages between 0 and 100.',
-                                style: TextStyle(
-                                  color: Color(0xFFB91C1C),
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 14,
-                                ),
+                                'Please enter valid values. MCA must be between 30 and 91, and Marks between 0 and 100.',
+                                style: TextStyle(color: Color(0xFF991B1B), fontSize: 13),
                               ),
                             ),
                           ],
@@ -519,9 +488,9 @@ class _RelativeGradingCalculatorScreenState
                               width: 64,
                               height: 64,
                               decoration: BoxDecoration(
-                                color: _gradeColor.withValues(alpha: 0.1),
+                                color: _gradeColor.withValues(alpha: 0.12),
                                 shape: BoxShape.circle,
-                                border: Border.all(color: _gradeColor.withValues(alpha: 0.2), width: 1),
+                                border: Border.all(color: _gradeColor.withValues(alpha: 0.3), width: 1),
                               ),
                               alignment: Alignment.center,
                               child: Text(
@@ -538,19 +507,19 @@ class _RelativeGradingCalculatorScreenState
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
+                                  Text(
                                     'CALCULATED GRADE',
                                     style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: _muted),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
                                     'Grade ${_grade!} assigned',
-                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _ink),
+                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _ink),
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
                                     'MCA: ${_inputMca!.toStringAsFixed(1)}% (rounded to $_roundedMca%)\nYour Marks: ${_inputScore!.toStringAsFixed(1)}% (rounded to $_roundedScore%)',
-                                    style: const TextStyle(fontSize: 12, color: _muted, height: 1.3),
+                                    style: TextStyle(fontSize: 12, color: _muted, height: 1.3),
                                   ),
                                 ],
                               ),
@@ -564,7 +533,7 @@ class _RelativeGradingCalculatorScreenState
               // Dynamic threshold reference title
               Text(
                 'RELATIVE SCALING AT MCA = $mcaForTable%',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
                   color: _muted,
@@ -588,12 +557,12 @@ class _RelativeGradingCalculatorScreenState
                     ),
                     children: [
                       // Header Row
-                      const TableRow(
-                        decoration: BoxDecoration(color: Color(0xFFF8FAFC)),
+                      TableRow(
+                        decoration: BoxDecoration(color: _flatBg),
                         children: [
                           TableCell(
                             child: Padding(
-                              padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                               child: Text(
                                 'Course Score Range (%)',
                                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: _ink),
@@ -602,7 +571,7 @@ class _RelativeGradingCalculatorScreenState
                           ),
                           TableCell(
                             child: Padding(
-                              padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                               child: Text(
                                 'Letter Grade',
                                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: _ink),
@@ -616,7 +585,7 @@ class _RelativeGradingCalculatorScreenState
                         final isUsersGrade = showResult && _grade == row['grade'] && _grade != 'Invalid';
                         return TableRow(
                           decoration: BoxDecoration(
-                            color: isUsersGrade ? _gradeColor.withValues(alpha: 0.05) : null,
+                            color: isUsersGrade ? _gradeColor.withValues(alpha: 0.1) : null,
                           ),
                           children: [
                             TableCell(

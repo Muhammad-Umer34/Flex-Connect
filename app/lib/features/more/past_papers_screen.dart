@@ -17,10 +17,15 @@ class _PastPapersScreenState extends State<PastPapersScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   static const Color _accent = Color(0xFF2563EB); // Royal Blue
-  static const Color _ink = Color(0xFF0F172A); // Dark Slate
-  static const Color _muted = Color(0xFF6B7280); // Cool Gray
-  static const Color _flatBg = Color(0xFFF8FAFC); // Slate 50
-  static const Color _flatBorder = Color(0xFFF1F5F9); // Slate 100
+
+  Color get _ink => Theme.of(context).brightness == Brightness.dark ? const Color(0xFFF1F5F9) : const Color(0xFF0F172A);
+  Color get _muted => Theme.of(context).brightness == Brightness.dark ? const Color(0xFF94A3B8) : const Color(0xFF6B7280);
+  Color get _containerBg => Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC);
+  Color get _containerBorder => Theme.of(context).brightness == Brightness.dark ? const Color(0xFF334155) : const Color(0xFFF1F5F9);
+  Color get _cardBg => Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1E293B) : Colors.white;
+  Color get _inputBorder => Theme.of(context).brightness == Brightness.dark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+  Color get _headerSub => Theme.of(context).brightness == Brightness.dark ? const Color(0xFF60A5FA) : const Color(0xFF1E3A8A);
+  Color get _iconBg => Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2563EB).withValues(alpha: 0.15) : const Color(0xFFEFF6FF);
 
   @override
   void initState() {
@@ -78,11 +83,11 @@ class _PastPapersScreenState extends State<PastPapersScreen> {
               child: Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: _cardBg,
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+                  border: Border.all(color: _inputBorder, width: 1),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.arrow_back_rounded,
                   color: _ink,
                   size: 16,
@@ -93,9 +98,9 @@ class _PastPapersScreenState extends State<PastPapersScreen> {
             Container(
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
-                color: const Color(0xFFEFF6FF),
+                color: _iconBg,
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: const Color(0xFFBFDBFE), width: 1),
+                border: Border.all(color: _accent.withValues(alpha: 0.3), width: 1),
               ),
               child: const Icon(
                 Icons.library_books_outlined,
@@ -104,10 +109,10 @@ class _PastPapersScreenState extends State<PastPapersScreen> {
               ),
             ),
             const SizedBox(width: 8),
-            const Text(
+            Text(
               'Past Papers & Resources',
               style: TextStyle(
-                color: Color(0xFF1E3A8A),
+                color: _headerSub,
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
@@ -119,7 +124,7 @@ class _PastPapersScreenState extends State<PastPapersScreen> {
   }
 
   Widget _buildTitleSection(BuildContext context) {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
@@ -131,11 +136,11 @@ class _PastPapersScreenState extends State<PastPapersScreen> {
             letterSpacing: -0.5,
           ),
         ),
-        SizedBox(height: 6),
-        Text(
+        const SizedBox(height: 6),
+        const Text(
           'FAST DRIVE RESOURCES',
           style: TextStyle(
-            color: Color(0xFFB45309),
+            color: Color(0xFFF59E0B),
             fontSize: 11,
             fontWeight: FontWeight.w700,
             letterSpacing: 1.5,
@@ -148,16 +153,16 @@ class _PastPapersScreenState extends State<PastPapersScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         bottom: false,
         child: _isLoading
-            ? const Center(
+            ? Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircularProgressIndicator(color: _accent),
-                    SizedBox(height: 16),
+                    const CircularProgressIndicator(color: _accent),
+                    const SizedBox(height: 16),
                     Text(
                       'Loading drive archives...',
                       style: TextStyle(color: _muted, fontSize: 14),
@@ -177,27 +182,27 @@ class _PastPapersScreenState extends State<PastPapersScreen> {
                     const SizedBox(height: 36),
                     TextField(
                       controller: _searchController,
-                      style: const TextStyle(color: _ink),
+                      style: TextStyle(color: _ink),
                       decoration: InputDecoration(
                         hintText: 'Search subjects...',
-                        hintStyle: const TextStyle(color: _muted, fontSize: 14),
+                        hintStyle: TextStyle(color: _muted, fontSize: 14),
                         prefixIcon: const Icon(Icons.search_outlined, color: _accent),
-                        fillColor: Colors.white,
+                        fillColor: _cardBg,
                         filled: true,
                         suffixIcon: _searchController.text.isNotEmpty
                             ? IconButton(
-                                icon: const Icon(Icons.clear, color: _muted),
+                                icon: Icon(Icons.clear, color: _muted),
                                 onPressed: () => _searchController.clear(),
                               )
                             : null,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                          borderSide: BorderSide(color: _inputBorder),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                          borderSide: BorderSide(color: _inputBorder),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -216,10 +221,10 @@ class _PastPapersScreenState extends State<PastPapersScreen> {
                                   Icon(
                                     Icons.find_in_page_outlined,
                                     size: 80,
-                                    color: Colors.grey.shade400,
+                                    color: _muted.withValues(alpha: 0.5),
                                   ),
                                   const SizedBox(height: 16),
-                                  const Text(
+                                  Text(
                                     'No subjects found',
                                     style: TextStyle(
                                       color: _ink,
@@ -228,7 +233,7 @@ class _PastPapersScreenState extends State<PastPapersScreen> {
                                     ),
                                   ),
                                   const SizedBox(height: 8),
-                                  const Text(
+                                  Text(
                                     'Try checking spelling or use keywords',
                                     style: TextStyle(
                                       color: _muted,
@@ -265,9 +270,9 @@ class _PastPapersScreenState extends State<PastPapersScreen> {
                                   borderRadius: BorderRadius.circular(12),
                                   child: Container(
                                     decoration: BoxDecoration(
-                                      color: _flatBg,
+                                      color: _containerBg,
                                       borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(color: _flatBorder, width: 1),
+                                      border: Border.all(color: _containerBorder, width: 1),
                                     ),
                                     padding: const EdgeInsets.all(16),
                                     child: Row(
@@ -275,8 +280,8 @@ class _PastPapersScreenState extends State<PastPapersScreen> {
                                         Container(
                                           width: 40,
                                           height: 40,
-                                          decoration: const BoxDecoration(
-                                            color: Color(0xFFEFF6FF),
+                                          decoration: BoxDecoration(
+                                            color: _iconBg,
                                             shape: BoxShape.circle,
                                           ),
                                           child: const Icon(
@@ -292,7 +297,7 @@ class _PastPapersScreenState extends State<PastPapersScreen> {
                                             children: [
                                               Text(
                                                 subject,
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                   fontSize: 15,
                                                   color: _ink,
@@ -301,7 +306,7 @@ class _PastPapersScreenState extends State<PastPapersScreen> {
                                               const SizedBox(height: 4),
                                               Text(
                                                 '$count files available',
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   fontSize: 12,
                                                   color: _muted,
                                                 ),
@@ -309,7 +314,7 @@ class _PastPapersScreenState extends State<PastPapersScreen> {
                                             ],
                                           ),
                                         ),
-                                        const Icon(
+                                        Icon(
                                           Icons.chevron_right_rounded,
                                           size: 20,
                                           color: _muted,
@@ -348,10 +353,15 @@ class _SubjectPapersScreenState extends State<SubjectPapersScreen> {
   final Map<String, List<PastPaper>> _groupedPapers = {};
   
   static const Color _accent = Color(0xFF2563EB); // Royal Blue
-  static const Color _ink = Color(0xFF0F172A); // Dark Slate
-  static const Color _muted = Color(0xFF6B7280); // Cool Gray
-  static const Color _flatBg = Color(0xFFF8FAFC); // Slate 50
-  static const Color _flatBorder = Color(0xFFF1F5F9); // Slate 100
+
+  Color get _ink => Theme.of(context).brightness == Brightness.dark ? const Color(0xFFF1F5F9) : const Color(0xFF0F172A);
+  Color get _muted => Theme.of(context).brightness == Brightness.dark ? const Color(0xFF94A3B8) : const Color(0xFF6B7280);
+  Color get _containerBg => Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC);
+  Color get _containerBorder => Theme.of(context).brightness == Brightness.dark ? const Color(0xFF334155) : const Color(0xFFF1F5F9);
+  Color get _cardBg => Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1E293B) : Colors.white;
+  Color get _inputBorder => Theme.of(context).brightness == Brightness.dark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+  Color get _headerSub => Theme.of(context).brightness == Brightness.dark ? const Color(0xFF60A5FA) : const Color(0xFF1E3A8A);
+  Color get _iconBg => Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2563EB).withValues(alpha: 0.15) : const Color(0xFFEFF6FF);
 
   @override
   void initState() {
@@ -394,10 +404,10 @@ class _SubjectPapersScreenState extends State<SubjectPapersScreen> {
   Future<void> _openPaperLink(String url) async {
     final uri = Uri.parse(url);
     try {
-      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      if (!await launchUrl(uri, mode: LaunchMode.inAppWebView)) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not open link in external app')),
+            const SnackBar(content: Text('Could not open link')),
           );
         }
       }
@@ -471,11 +481,11 @@ class _SubjectPapersScreenState extends State<SubjectPapersScreen> {
               child: Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: _cardBg,
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+                  border: Border.all(color: _inputBorder, width: 1),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.arrow_back_rounded,
                   color: _ink,
                   size: 16,
@@ -486,9 +496,9 @@ class _SubjectPapersScreenState extends State<SubjectPapersScreen> {
             Container(
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
-                color: const Color(0xFFEFF6FF),
+                color: _iconBg,
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: const Color(0xFFBFDBFE), width: 1),
+                border: Border.all(color: _accent.withValues(alpha: 0.3), width: 1),
               ),
               child: const Icon(
                 Icons.folder_shared_outlined,
@@ -497,10 +507,10 @@ class _SubjectPapersScreenState extends State<SubjectPapersScreen> {
               ),
             ),
             const SizedBox(width: 8),
-            const Text(
+            Text(
               'Subject Resources',
               style: TextStyle(
-                color: Color(0xFF1E3A8A),
+                color: _headerSub,
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
@@ -515,7 +525,7 @@ class _SubjectPapersScreenState extends State<SubjectPapersScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Resources',
           style: TextStyle(
             color: _ink,
@@ -528,7 +538,7 @@ class _SubjectPapersScreenState extends State<SubjectPapersScreen> {
         Text(
           widget.subjectName.toUpperCase(),
           style: const TextStyle(
-            color: Color(0xFFB45309),
+            color: Color(0xFFF59E0B),
             fontSize: 11,
             fontWeight: FontWeight.w700,
             letterSpacing: 1.5,
@@ -543,7 +553,7 @@ class _SubjectPapersScreenState extends State<SubjectPapersScreen> {
     final categoriesList = _groupedPapers.keys.toList();
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
@@ -567,10 +577,10 @@ class _SubjectPapersScreenState extends State<SubjectPapersScreen> {
                             Icon(
                               Icons.folder_open,
                               size: 64,
-                              color: Colors.grey.shade400,
+                              color: _muted.withValues(alpha: 0.5),
                             ),
                             const SizedBox(height: 12),
-                            const Text(
+                            Text(
                               'No resource files found for this subject.',
                               style: TextStyle(
                                 color: _muted,
@@ -594,9 +604,9 @@ class _SubjectPapersScreenState extends State<SubjectPapersScreen> {
                         return Container(
                           margin: const EdgeInsets.only(bottom: 12),
                           decoration: BoxDecoration(
-                            color: _flatBg,
+                            color: _containerBg,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: _flatBorder, width: 1),
+                            border: Border.all(color: _containerBorder, width: 1),
                           ),
                           child: Column(
                             children: [
@@ -617,8 +627,8 @@ class _SubjectPapersScreenState extends State<SubjectPapersScreen> {
                                     children: [
                                       Container(
                                         padding: const EdgeInsets.all(8),
-                                        decoration: const BoxDecoration(
-                                          color: Color(0xFFEFF6FF),
+                                        decoration: BoxDecoration(
+                                          color: _iconBg,
                                           shape: BoxShape.circle,
                                         ),
                                         child: Icon(
@@ -634,7 +644,7 @@ class _SubjectPapersScreenState extends State<SubjectPapersScreen> {
                                           children: [
                                             Text(
                                               category,
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 15,
                                                 color: _ink,
@@ -643,7 +653,7 @@ class _SubjectPapersScreenState extends State<SubjectPapersScreen> {
                                             const SizedBox(height: 2),
                                             Text(
                                               '$count files available',
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                 fontSize: 12,
                                                 color: _muted,
                                               ),
@@ -660,12 +670,12 @@ class _SubjectPapersScreenState extends State<SubjectPapersScreen> {
                                 ),
                               ),
                               if (isExpanded) ...[
-                                const Divider(color: Color(0xFFE2E8F0), height: 1),
+                                Divider(color: _containerBorder, height: 1),
                                 ListView.separated(
                                   shrinkWrap: true,
                                   physics: const NeverScrollableScrollPhysics(),
                                   itemCount: papers.length,
-                                  separatorBuilder: (context, idx) => const Divider(color: Color(0xFFF1F5F9), height: 1),
+                                  separatorBuilder: (context, idx) => Divider(color: _containerBorder, height: 1),
                                   itemBuilder: (context, idx) {
                                     final paper = papers[idx];
                                     final fileIcon = _getFileIcon(paper.fileName);
@@ -676,7 +686,7 @@ class _SubjectPapersScreenState extends State<SubjectPapersScreen> {
                                       leading: Icon(fileIcon, color: fileColor),
                                       title: Text(
                                         paper.fileName,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 13,
                                           fontWeight: FontWeight.w500,
                                           color: _ink,

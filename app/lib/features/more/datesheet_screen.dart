@@ -6,8 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:gal/gal.dart';
 import '../../services/datesheet_parser.dart';
+import '../../services/datesheet_storage.dart';
+import '../../services/home_widget_service.dart';
 import '../../services/transcript_storage.dart';
 import '../../widgets/custom_toast.dart';
+import '../../utils/calendar_utils.dart';
 
 class DatesheetScreen extends StatefulWidget {
   const DatesheetScreen({super.key});
@@ -30,6 +33,21 @@ class _DatesheetScreenState extends State<DatesheetScreen> {
   static const Color _accent = Color(0xFF059669); // Emerald Green
   static const Color _ink = Color(0xFF0F172A); // Dark Slate
   static const Color _muted = Color(0xFF6B7280); // Cool Gray
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedDatesheet();
+  }
+
+  Future<void> _loadSavedDatesheet() async {
+    final events = await DatesheetStorage.load();
+    if (events != null && mounted) {
+      setState(() {
+        _events = events;
+      });
+    }
+  }
 
   Future<void> _pickFile() async {
     try {
@@ -117,6 +135,9 @@ class _DatesheetScreenState extends State<DatesheetScreen> {
         _events = parsedEvents;
         _isLoading = false;
       });
+      
+      await DatesheetStorage.save(parsedEvents);
+      await HomeWidgetService.updateNextClassWidget();
     } catch (e) {
       setState(() {
         _isLoading = false;
@@ -125,7 +146,7 @@ class _DatesheetScreenState extends State<DatesheetScreen> {
     }
   }
 
-  void _resetScreen() {
+  void _resetScreen() async {
     setState(() {
       _fileBytes = null;
       _fileName = null;
@@ -133,6 +154,9 @@ class _DatesheetScreenState extends State<DatesheetScreen> {
       _error = null;
       _activeFilter = 'All';
     });
+    
+    await DatesheetStorage.clear();
+    await HomeWidgetService.updateNextClassWidget();
   }
 
   String _getMonthAbbr(String dateStr) {
@@ -333,42 +357,59 @@ class _DatesheetScreenState extends State<DatesheetScreen> {
           ),
         ),
         if (_events != null)
-          IconButton(
-            icon: Icon(Icons.refresh, color: isDark ? Colors.grey[400] : _muted),
-            tooltip: 'Upload New Datesheet',
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
-                  title: Text(
-                    'Reset Datesheet',
-                    style: TextStyle(color: isDark ? Colors.white : _ink),
-                  ),
-                  content: Text(
-                    'Are you sure you want to reset and upload a different datesheet?',
-                    style: TextStyle(color: isDark ? Colors.grey[300] : _muted),
-                  ),
-                  actions: [
-                    TextButton(
-                      child: const Text('Cancel'),
-                      onPressed: () => Navigator.pop(context),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: Icon(Icons.calendar_today_rounded, color: isDark ? Colors.grey[400] : _muted),
+                tooltip: 'Export to Google Calendar',
+                onPressed: _exportToCalendar,
+              ),
+              IconButton(
+                icon: Icon(Icons.refresh, color: isDark ? Colors.grey[400] : _muted),
+                tooltip: 'Upload New Datesheet',
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+                      title: Text(
+                        'Reset Datesheet',
+                        style: TextStyle(color: isDark ? Colors.white : _ink),
+                      ),
+                      content: Text(
+                        'Are you sure you want to reset and upload a different datesheet?',
+                        style: TextStyle(color: isDark ? Colors.grey[300] : _muted),
+                      ),
+                      actions: [
+                        TextButton(
+                          child: const Text('Cancel'),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        TextButton(
+                          style: TextButton.styleFrom(foregroundColor: Colors.red),
+                          onPressed: () {
+                            Navigator.pop(context);
+                            _resetScreen();
+                          },
+                          child: const Text('Reset'),
+                        ),
+                      ],
                     ),
-                    TextButton(
-                      style: TextButton.styleFrom(foregroundColor: Colors.red),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _resetScreen();
-                      },
-                      child: const Text('Reset'),
-                    ),
-                  ],
-                ),
-              );
-            },
+                  );
+                },
+              ),
+            ],
           ),
       ],
     );
+  }
+
+  Future<void> _exportToCalendar() async {
+    if (_events == null || _events!.isEmpty) return;
+
+    final icsContent = CalendarUtils.generateDatesheetIcs(_events!);
+    await CalendarUtils.exportAndShare(context, icsContent, 'exam_datesheet.ics');
   }
 
   Widget _buildTitle(bool isDark) {

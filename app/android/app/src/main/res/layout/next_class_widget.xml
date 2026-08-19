@@ -1,0 +1,458 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:paddingLeft="14dp"
+    android:paddingRight="14dp"
+    android:paddingTop="12dp"
+    android:paddingBottom="12dp">
+
+    <!-- 1. OFF DAY / COMPLETED LAYOUT -->
+    <LinearLayout
+        android:id="@+id/widget_layout_off_day"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <!-- Micro Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="FLEX CONNECT"
+                android:textColor="#3B82F6"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/widget_off_day_badge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/widget_badge_next"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp"
+                android:text="FREE DAY"
+                android:textColor="#93C5FD"
+                android:textSize="9sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/widget_off_day_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No Classes Today ✨"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:id="@+id/widget_off_day_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enjoy your free day or review past courses."
+            android:textColor="#94A3B8"
+            android:textSize="11sp"
+            android:gravity="center" />
+    </LinearLayout>
+
+    <!-- 2. ACTIVE CLASS INFO LAYOUT -->
+    <LinearLayout
+        android:id="@+id/widget_layout_class_info"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- Top Header Bar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:id="@+id/widget_header_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="TODAY'S CLASSES"
+                android:textColor="#60A5FA"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/widget_status_badge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/widget_badge_live"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp"
+                android:text="● IN PROGRESS"
+                android:textColor="#6EE7B7"
+                android:textSize="9sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- HERO CARD (Primary active or upcoming class) -->
+        <LinearLayout
+            android:id="@+id/widget_hero_card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/widget_secondary_card"
+            android:orientation="vertical"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp">
+
+            <!-- Course Title -->
+            <TextView
+                android:id="@+id/widget_hero_course"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Course Title"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:ellipsize="end"
+                android:maxLines="1" />
+
+            <!-- Time & Room Badge Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="6dp">
+
+                <TextView
+                    android:id="@+id/widget_hero_time"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="🕒 10:00 - 11:30"
+                    android:textColor="#94A3B8"
+                    android:textSize="11.5sp" />
+
+                <TextView
+                    android:id="@+id/widget_hero_room"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/widget_badge_room"
+                    android:paddingLeft="7dp"
+                    android:paddingRight="7dp"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="2dp"
+                    android:text="📍 CS-01"
+                    android:textColor="#F1F5F9"
+                    android:textSize="10.5sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- SECONDARY STRIP (When ongoing class is active, shows next class below it) -->
+        <LinearLayout
+            android:id="@+id/widget_secondary_strip"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="8dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="UP NEXT:"
+                android:textColor="#64748B"
+                android:textSize="9.5sp"
+                android:textStyle="bold"
+                android:layout_marginRight="6dp"
+                android:layout_marginEnd="6dp" />
+
+            <TextView
+                android:id="@+id/widget_secondary_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Course • Time • Room"
+                android:textColor="#94A3B8"
+                android:textSize="10.5sp"
+                android:ellipsize="end"
+                android:maxLines="1" />
+        </LinearLayout>
+
+        <!-- 3. EXPANDED SCHEDULE CONTAINER (Visible when widget is resized tall) -->
+        <LinearLayout
+            android:id="@+id/widget_today_schedule_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="10dp"
+            android:visibility="gone">
+
+            <!-- Horizontal Divider -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#1E293B"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TODAY'S TIMETABLE"
+                android:textColor="#64748B"
+                android:textSize="9sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="6dp" />
+
+            <!-- Row 1 -->
+            <LinearLayout
+                android:id="@+id/widget_class_row_1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/widget_row_bg"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:layout_marginBottom="4dp"
+                android:visibility="gone">
+                <TextView
+                    android:id="@+id/widget_row_time_1"
+                    android:layout_width="74dp"
+                    android:layout_height="wrap_content"
+                    android:text="08:30-10:00"
+                    android:textColor="#38BDF8"
+                    android:textSize="10.5sp"
+                    android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/widget_row_course_1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Course 1"
+                    android:textColor="#F8FAFC"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginRight="4dp" />
+                <TextView
+                    android:id="@+id/widget_row_room_1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="CS-01"
+                    android:textColor="#94A3B8"
+                    android:textSize="10.5sp" />
+            </LinearLayout>
+
+            <!-- Row 2 -->
+            <LinearLayout
+                android:id="@+id/widget_class_row_2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/widget_row_bg"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:layout_marginBottom="4dp"
+                android:visibility="gone">
+                <TextView
+                    android:id="@+id/widget_row_time_2"
+                    android:layout_width="74dp"
+                    android:layout_height="wrap_content"
+                    android:text="10:00-11:30"
+                    android:textColor="#38BDF8"
+                    android:textSize="10.5sp"
+                    android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/widget_row_course_2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Course 2"
+                    android:textColor="#F8FAFC"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginRight="4dp" />
+                <TextView
+                    android:id="@+id/widget_row_room_2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="CS-02"
+                    android:textColor="#94A3B8"
+                    android:textSize="10.5sp" />
+            </LinearLayout>
+
+            <!-- Row 3 -->
+            <LinearLayout
+                android:id="@+id/widget_class_row_3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/widget_row_bg"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:layout_marginBottom="4dp"
+                android:visibility="gone">
+                <TextView
+                    android:id="@+id/widget_row_time_3"
+                    android:layout_width="74dp"
+                    android:layout_height="wrap_content"
+                    android:text="11:30-01:00"
+                    android:textColor="#38BDF8"
+                    android:textSize="10.5sp"
+                    android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/widget_row_course_3"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Course 3"
+                    android:textColor="#F8FAFC"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginRight="4dp" />
+                <TextView
+                    android:id="@+id/widget_row_room_3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="CS-03"
+                    android:textColor="#94A3B8"
+                    android:textSize="10.5sp" />
+            </LinearLayout>
+
+            <!-- Row 4 -->
+            <LinearLayout
+                android:id="@+id/widget_class_row_4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/widget_row_bg"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:layout_marginBottom="4dp"
+                android:visibility="gone">
+                <TextView
+                    android:id="@+id/widget_row_time_4"
+                    android:layout_width="74dp"
+                    android:layout_height="wrap_content"
+                    android:text="01:00-02:30"
+                    android:textColor="#38BDF8"
+                    android:textSize="10.5sp"
+                    android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/widget_row_course_4"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Course 4"
+                    android:textColor="#F8FAFC"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginRight="4dp" />
+                <TextView
+                    android:id="@+id/widget_row_room_4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="CS-04"
+                    android:textColor="#94A3B8"
+                    android:textSize="10.5sp" />
+            </LinearLayout>
+
+            <!-- Row 5 -->
+            <LinearLayout
+                android:id="@+id/widget_class_row_5"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/widget_row_bg"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:layout_marginBottom="4dp"
+                android:visibility="gone">
+                <TextView
+                    android:id="@+id/widget_row_time_5"
+                    android:layout_width="74dp"
+                    android:layout_height="wrap_content"
+                    android:text="02:30-04:00"
+                    android:textColor="#38BDF8"
+                    android:textSize="10.5sp"
+                    android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/widget_row_course_5"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Course 5"
+                    android:textColor="#F8FAFC"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginRight="4dp" />
+                <TextView
+                    android:id="@+id/widget_row_room_5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="CS-05"
+                    android:textColor="#94A3B8"
+                    android:textSize="10.5sp" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>
