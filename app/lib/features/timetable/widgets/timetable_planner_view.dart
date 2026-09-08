@@ -53,8 +53,15 @@ class _TimetablePlannerViewState extends State<TimetablePlannerView> {
     super.dispose();
   }
 
-  Widget _buildSearchSection(Color deptColor) {
+  Widget _buildSearchSection(Color deptColor, bool isDark) {
     if (widget.snapshot == null || widget.selectedDept == null) return const SizedBox.shrink();
+
+    final textInk = isDark ? Colors.white : _ink;
+    final textMuted = isDark ? const Color(0xFF94A3B8) : _muted;
+    final cardBg = isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC);
+    final cardBorder = isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9);
+    final fieldFill = isDark ? const Color(0xFF0F172A) : Colors.white;
+    final fieldBorder = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
 
     // 1. Get all unique courses in this department
     final deptSections = widget.snapshot!.sections[widget.selectedDept!] ?? [];
@@ -70,9 +77,9 @@ class _TimetablePlannerViewState extends State<TimetablePlannerView> {
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: cardBg,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFF1F5F9), width: 1),
+        border: Border.all(color: cardBorder, width: 1),
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -82,25 +89,25 @@ class _TimetablePlannerViewState extends State<TimetablePlannerView> {
             children: [
               Icon(Icons.search_rounded, color: deptColor),
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 'Search & Add Course',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: _ink),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: textInk),
               ),
             ],
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _searchController,
-            style: const TextStyle(color: _ink),
+            style: TextStyle(color: textInk),
             decoration: InputDecoration(
               hintText: 'Type course name...',
-              hintStyle: const TextStyle(color: _muted),
-              prefixIcon: const Icon(Icons.search_outlined, color: _muted),
-              fillColor: Colors.white,
+              hintStyle: TextStyle(color: isDark ? const Color(0xFF64748B) : textMuted),
+              prefixIcon: Icon(Icons.search_outlined, color: isDark ? const Color(0xFF64748B) : textMuted),
+              fillColor: fieldFill,
               filled: true,
               suffixIcon: _searchQuery.isNotEmpty
                   ? IconButton(
-                      icon: const Icon(Icons.clear, color: _muted),
+                      icon: Icon(Icons.clear, color: textMuted),
                       onPressed: () {
                         setState(() {
                           _searchController.clear();
@@ -112,11 +119,11 @@ class _TimetablePlannerViewState extends State<TimetablePlannerView> {
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                borderSide: BorderSide(color: fieldBorder),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                borderSide: BorderSide(color: fieldBorder),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -136,9 +143,9 @@ class _TimetablePlannerViewState extends State<TimetablePlannerView> {
             Container(
               constraints: const BoxConstraints(maxHeight: 180),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: isDark ? const Color(0xFF0F172A) : Colors.white,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
+                border: Border.all(color: fieldBorder),
               ),
               child: ListView.builder(
                 shrinkWrap: true,
@@ -146,7 +153,7 @@ class _TimetablePlannerViewState extends State<TimetablePlannerView> {
                 itemBuilder: (context, idx) {
                   final courseName = filteredCourses[idx];
                   return ListTile(
-                    title: Text(courseName, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: _ink)),
+                    title: Text(courseName, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: textInk)),
                     onTap: () {
                       setState(() {
                         _searchedCourseName = courseName;
@@ -163,17 +170,17 @@ class _TimetablePlannerViewState extends State<TimetablePlannerView> {
           // Selected searched course details container
           if (_searchedCourseName != null) ...[
             const SizedBox(height: 16),
-            const Divider(color: Color(0xFFF1F5F9)),
+            Divider(color: cardBorder),
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Search Result:',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: _muted),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: textMuted),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close, size: 18, color: _muted),
+                  icon: Icon(Icons.close, size: 18, color: textMuted),
                   onPressed: () {
                     setState(() {
                       _searchedCourseName = null;
@@ -186,7 +193,7 @@ class _TimetablePlannerViewState extends State<TimetablePlannerView> {
               final courseName = _searchedCourseName!;
               final availableSections = widget.getAvailableSectionsForCourse(courseName);
               if (availableSections.isEmpty) {
-                return const Text('No sections offering this course.', style: TextStyle(color: _muted));
+                return Text('No sections offering this course.', style: TextStyle(color: textMuted));
               }
               
               final isSelected = widget.isCourseSelected(courseName);
@@ -202,10 +209,12 @@ class _TimetablePlannerViewState extends State<TimetablePlannerView> {
 
               return Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isDark ? const Color(0xFF0F172A) : Colors.white,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: currentSectionClashes ? const Color(0xFFFCA5A5) : const Color(0xFFE2E8F0),
+                    color: currentSectionClashes
+                        ? (isDark ? const Color(0xFF991B1B) : const Color(0xFFFCA5A5))
+                        : fieldBorder,
                     width: 1,
                   ),
                 ),
@@ -215,12 +224,12 @@ class _TimetablePlannerViewState extends State<TimetablePlannerView> {
                   children: [
                     Text(
                       courseName,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: _ink),
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: textInk),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       widget.formatCourseEventsSubtitle(displayEvents),
-                      style: const TextStyle(fontSize: 12, color: _muted, height: 1.3),
+                      style: TextStyle(fontSize: 12, color: textMuted, height: 1.3),
                     ),
                     if (currentSectionClashes) ...[
                       const SizedBox(height: 8),
@@ -241,13 +250,13 @@ class _TimetablePlannerViewState extends State<TimetablePlannerView> {
                       children: [
                         Row(
                           children: [
-                            const Text('Sec: ', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: _ink)),
+                            Text('Sec: ', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: textInk)),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: isDark ? const Color(0xFF1E293B) : Colors.white,
                                 borderRadius: BorderRadius.circular(6),
-                                border: Border.all(color: const Color(0xFFE2E8F0)),
+                                border: Border.all(color: fieldBorder),
                               ),
                               child: DropdownButtonHideUnderline(
                                 child: SizedBox(
@@ -255,7 +264,7 @@ class _TimetablePlannerViewState extends State<TimetablePlannerView> {
                                   child: DropdownButton<String>(
                                     value: currentSection,
                                     isDense: true,
-                                    dropdownColor: Colors.white,
+                                    dropdownColor: isDark ? const Color(0xFF1E293B) : Colors.white,
                                     style: TextStyle(color: deptColor, fontWeight: FontWeight.bold, fontSize: 11),
                                     onChanged: (String? newSec) {
                                       if (newSec != null) {
@@ -271,7 +280,10 @@ class _TimetablePlannerViewState extends State<TimetablePlannerView> {
                                       final itemClashes = widget.doesSectionClashWithTimetable(courseName, s);
                                       return DropdownMenuItem<String>(
                                         value: s,
-                                        child: Text(itemClashes ? '$s (Clash)' : s),
+                                        child: Text(
+                                          itemClashes ? '$s (Clash)' : s,
+                                          style: TextStyle(color: isDark ? Colors.white : _ink),
+                                        ),
                                       );
                                     }).toList(),
                                   ),
@@ -314,6 +326,15 @@ class _TimetablePlannerViewState extends State<TimetablePlannerView> {
   Widget build(BuildContext context) {
     if (widget.snapshot == null || widget.selectedSection == null) return const SizedBox.shrink();
 
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final textInk = isDark ? Colors.white : _ink;
+    final textMuted = isDark ? const Color(0xFF94A3B8) : _muted;
+    final cardBg = isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC);
+    final cardBorder = isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9);
+    final fieldBorder = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+
     final deptColor = widget.selectedDept != null ? getDeptColor(widget.selectedDept!) : Colors.indigo;
 
     // 1. Get all courses in the parent section (e.g. CS-6B)
@@ -331,7 +352,7 @@ class _TimetablePlannerViewState extends State<TimetablePlannerView> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Autocomplete search interface
-        _buildSearchSection(deptColor),
+        _buildSearchSection(deptColor, isDark),
         const SizedBox(height: 24),
 
         // Primary classes
@@ -340,7 +361,7 @@ class _TimetablePlannerViewState extends State<TimetablePlannerView> {
           children: [
             Text(
               'Classes for Section ${widget.selectedSection}',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _ink),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textInk),
             ),
             TextButton(
               style: TextButton.styleFrom(foregroundColor: _accent),
@@ -378,10 +399,12 @@ class _TimetablePlannerViewState extends State<TimetablePlannerView> {
             return Container(
               margin: const EdgeInsets.symmetric(vertical: 6),
               decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
+                color: cardBg,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: currentSectionClashes ? const Color(0xFFFCA5A5) : const Color(0xFFF1F5F9),
+                  color: currentSectionClashes
+                      ? (isDark ? const Color(0xFF991B1B) : const Color(0xFFFCA5A5))
+                      : cardBorder,
                   width: 1,
                 ),
               ),
@@ -394,7 +417,7 @@ class _TimetablePlannerViewState extends State<TimetablePlannerView> {
                       Expanded(
                         child: Text(
                           courseName,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: _ink),
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: textInk),
                         ),
                       ),
                       Switch(
@@ -415,7 +438,7 @@ class _TimetablePlannerViewState extends State<TimetablePlannerView> {
                   const SizedBox(height: 4),
                   Text(
                     widget.formatCourseEventsSubtitle(displayEvents),
-                    style: const TextStyle(fontSize: 12, color: _muted, height: 1.3),
+                    style: TextStyle(fontSize: 12, color: textMuted, height: 1.3),
                   ),
                   if (currentSectionClashes) ...[
                     const SizedBox(height: 8),
@@ -434,19 +457,19 @@ class _TimetablePlannerViewState extends State<TimetablePlannerView> {
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                        const Icon(Icons.compare_arrows_rounded, size: 16, color: _muted),
+                        Icon(Icons.compare_arrows_rounded, size: 16, color: textMuted),
                         const SizedBox(width: 6),
-                        const Text(
+                        Text(
                           'Section:',
-                          style: TextStyle(fontSize: 12, color: _ink, fontWeight: FontWeight.bold),
+                          style: TextStyle(fontSize: 12, color: textInk, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: isDark ? const Color(0xFF0F172A) : Colors.white,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: const Color(0xFFE2E8F0)),
+                            border: Border.all(color: fieldBorder),
                           ),
                           child: DropdownButtonHideUnderline(
                             child: SizedBox(
@@ -454,7 +477,7 @@ class _TimetablePlannerViewState extends State<TimetablePlannerView> {
                               child: DropdownButton<String>(
                                 value: currentSection,
                                 isDense: true,
-                                dropdownColor: Colors.white,
+                                dropdownColor: isDark ? const Color(0xFF1E293B) : Colors.white,
                                 style: TextStyle(color: deptColor, fontWeight: FontWeight.bold, fontSize: 12),
                                 onChanged: (String? newSection) {
                                   if (newSection != null) {
@@ -466,7 +489,10 @@ class _TimetablePlannerViewState extends State<TimetablePlannerView> {
                                   final itemClashes = widget.doesSectionClashWithTimetable(courseName, sec);
                                   return DropdownMenuItem<String>(
                                     value: sec,
-                                    child: Text(itemClashes ? '$sec (Clash)' : sec),
+                                    child: Text(
+                                      itemClashes ? '$sec (Clash)' : sec,
+                                      style: TextStyle(color: isDark ? Colors.white : _ink),
+                                    ),
                                   );
                                 }).toList(),
                               ),
@@ -484,9 +510,9 @@ class _TimetablePlannerViewState extends State<TimetablePlannerView> {
         const SizedBox(height: 24),
 
         // Custom cross-section choices
-        const Text(
+        Text(
           'Custom & Cross-Section Selections',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _ink),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textInk),
         ),
         const SizedBox(height: 8),
 
@@ -496,14 +522,14 @@ class _TimetablePlannerViewState extends State<TimetablePlannerView> {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
+                color: cardBg,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFF1F5F9)),
+                border: Border.all(color: cardBorder),
               ),
-              child: const Center(
+              child: Center(
                 child: Text(
                   'No cross-section or junior courses added yet.',
-                  style: TextStyle(color: _muted, fontSize: 12),
+                  style: TextStyle(color: textMuted, fontSize: 12),
                 ),
               ),
             );
@@ -528,10 +554,12 @@ class _TimetablePlannerViewState extends State<TimetablePlannerView> {
               return Container(
                 margin: const EdgeInsets.symmetric(vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8FAFC),
+                  color: cardBg,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: currentSectionClashes ? const Color(0xFFFCA5A5) : const Color(0xFFF1F5F9),
+                    color: currentSectionClashes
+                        ? (isDark ? const Color(0xFF991B1B) : const Color(0xFFFCA5A5))
+                        : cardBorder,
                     width: 1,
                   ),
                 ),
@@ -545,7 +573,7 @@ class _TimetablePlannerViewState extends State<TimetablePlannerView> {
                         Expanded(
                           child: Text(
                             courseName,
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: _ink),
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: textInk),
                           ),
                         ),
                         IconButton(
@@ -560,7 +588,7 @@ class _TimetablePlannerViewState extends State<TimetablePlannerView> {
                     const SizedBox(height: 4),
                     Text(
                       widget.formatCourseEventsSubtitle(displayEvents),
-                      style: const TextStyle(fontSize: 12, color: _muted, height: 1.3),
+                      style: TextStyle(fontSize: 12, color: textMuted, height: 1.3),
                     ),
                     if (currentSectionClashes) ...[
                       const SizedBox(height: 8),
@@ -579,19 +607,19 @@ class _TimetablePlannerViewState extends State<TimetablePlannerView> {
                       const SizedBox(height: 12),
                       Row(
                         children: [
-                          const Icon(Icons.compare_arrows_rounded, size: 16, color: _muted),
+                          Icon(Icons.compare_arrows_rounded, size: 16, color: textMuted),
                           const SizedBox(width: 6),
-                          const Text(
+                          Text(
                             'Section:',
-                            style: TextStyle(fontSize: 12, color: _ink, fontWeight: FontWeight.bold),
+                            style: TextStyle(fontSize: 12, color: textInk, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: isDark ? const Color(0xFF0F172A) : Colors.white,
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: const Color(0xFFE2E8F0)),
+                              border: Border.all(color: fieldBorder),
                             ),
                             child: DropdownButtonHideUnderline(
                               child: SizedBox(
@@ -599,7 +627,7 @@ class _TimetablePlannerViewState extends State<TimetablePlannerView> {
                                 child: DropdownButton<String>(
                                   value: currentSection,
                                   isDense: true,
-                                  dropdownColor: Colors.white,
+                                  dropdownColor: isDark ? const Color(0xFF1E293B) : Colors.white,
                                   style: TextStyle(color: deptColor, fontWeight: FontWeight.bold, fontSize: 12),
                                   onChanged: (String? newSection) {
                                     if (newSection != null) {
@@ -611,7 +639,10 @@ class _TimetablePlannerViewState extends State<TimetablePlannerView> {
                                     final itemClashes = widget.doesSectionClashWithTimetable(courseName, sec);
                                     return DropdownMenuItem<String>(
                                       value: sec,
-                                      child: Text(itemClashes ? '$sec (Clash)' : sec),
+                                      child: Text(
+                                        itemClashes ? '$sec (Clash)' : sec,
+                                        style: TextStyle(color: isDark ? Colors.white : _ink),
+                                      ),
                                     );
                                   }).toList(),
                                 ),

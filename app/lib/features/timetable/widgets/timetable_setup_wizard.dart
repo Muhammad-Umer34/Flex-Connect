@@ -25,14 +25,24 @@ class TimetableSetupWizard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final cardBg = isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC);
+    final cardBorder = isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9);
+    final fieldFill = isDark ? const Color(0xFF0F172A) : Colors.white;
+    final fieldBorder = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+    final textInk = isDark ? Colors.white : _ink;
+    final textMuted = isDark ? const Color(0xFF94A3B8) : _muted;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
           decoration: BoxDecoration(
-            color: const Color(0xFFF8FAFC),
+            color: cardBg,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFF1F5F9), width: 1),
+            border: Border.all(color: cardBorder, width: 1),
           ),
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -43,51 +53,54 @@ class TimetableSetupWizard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFEFF6FF),
+                      color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: const Color(0xFFBFDBFE), width: 1),
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF334155) : const Color(0xFFBFDBFE),
+                        width: 1,
+                      ),
                     ),
                     child: const Icon(Icons.group_outlined, color: _accent, size: 16),
                   ),
                   const SizedBox(width: 8),
-                  const Text(
+                  Text(
                     'Class Section Settings',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _ink),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textInk),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 'ENTER YOUR SECTION (E.G. BCS-6B)',
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
-                  color: _muted,
+                  color: textMuted,
                   letterSpacing: 0.5,
                 ),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: sectionInputController,
-                style: const TextStyle(color: _ink, fontWeight: FontWeight.w500),
+                style: TextStyle(color: textInk, fontWeight: FontWeight.w500),
                 textCapitalization: TextCapitalization.characters,
                 inputFormatters: [
                   const SectionInputFormatter(),
                 ],
                 decoration: InputDecoration(
                   hintText: 'e.g. BCS-6B',
-                  hintStyle: const TextStyle(color: _muted, fontWeight: FontWeight.normal),
-                  prefixIcon: const Icon(Icons.class_outlined, color: _muted),
-                  fillColor: Colors.white,
+                  hintStyle: TextStyle(color: isDark ? const Color(0xFF64748B) : _muted, fontWeight: FontWeight.normal),
+                  prefixIcon: Icon(Icons.class_outlined, color: isDark ? const Color(0xFF64748B) : _muted),
+                  fillColor: fieldFill,
                   filled: true,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                    borderSide: BorderSide(color: fieldBorder),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                    borderSide: BorderSide(color: fieldBorder),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -99,12 +112,12 @@ class TimetableSetupWizard extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 24),
-        const Text(
+        Text(
           'UPLOAD EXCEL SHEET',
           style: TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.w700,
-            color: _muted,
+            color: textMuted,
             letterSpacing: 0.5,
           ),
         ),
@@ -117,13 +130,13 @@ class TimetableSetupWizard extends StatelessWidget {
             height: 180,
             decoration: BoxDecoration(
               color: selectedBytes != null
-                  ? const Color(0xFFEFF6FF)
-                  : const Color(0xFFF8FAFC),
+                  ? (isDark ? const Color(0xFF1E3A8A).withValues(alpha: 0.25) : const Color(0xFFEFF6FF))
+                  : cardBg,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: selectedBytes != null
-                    ? const Color(0xFFBFDBFE)
-                    : const Color(0xFFE2E8F0),
+                    ? (isDark ? const Color(0xFF2563EB).withValues(alpha: 0.5) : const Color(0xFFBFDBFE))
+                    : fieldBorder,
                 width: 1,
               ),
             ),
@@ -134,8 +147,8 @@ class TimetableSetupWizard extends StatelessWidget {
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: selectedBytes != null
-                        ? const Color(0xFFDBEAFE)
-                        : const Color(0xFFF1F5F9),
+                        ? (isDark ? const Color(0xFF1E3A8A).withValues(alpha: 0.4) : const Color(0xFFDBEAFE))
+                        : (isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9)),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -143,22 +156,22 @@ class TimetableSetupWizard extends StatelessWidget {
                         ? Icons.check_circle_rounded
                         : Icons.cloud_upload_outlined,
                     size: 32,
-                    color: selectedBytes != null ? _accent : _muted,
+                    color: selectedBytes != null ? _accent : textMuted,
                   ),
                 ),
                 const SizedBox(height: 12),
                 Text(
                   selectedBytes != null ? 'Excel Selected' : 'Choose Spreadsheet File',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 15,
-                    color: _ink,
+                    color: textInk,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   selectedFileName ?? 'Supported formats: .xlsx, .xls',
-                  style: const TextStyle(color: _muted, fontSize: 12),
+                  style: TextStyle(color: textMuted, fontSize: 12),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -170,18 +183,21 @@ class TimetableSetupWizard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFFFEF2F2),
+              color: isDark ? const Color(0xFF7F1D1D).withValues(alpha: 0.3) : const Color(0xFFFEF2F2),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: const Color(0xFFFCA5A5)),
+              border: Border.all(color: isDark ? const Color(0xFF991B1B) : const Color(0xFFFCA5A5)),
             ),
             child: Row(
               children: [
-                const Icon(Icons.error_outline, color: Color(0xFFB91C1C)),
+                const Icon(Icons.error_outline, color: Color(0xFFEF4444)),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     errorMessage!,
-                    style: const TextStyle(color: Color(0xFFB91C1C), fontSize: 13),
+                    style: TextStyle(
+                      color: isDark ? const Color(0xFFFCA5A5) : const Color(0xFFB91C1C),
+                      fontSize: 13,
+                    ),
                   ),
                 ),
               ],
@@ -198,8 +214,8 @@ class TimetableSetupWizard extends StatelessWidget {
               backgroundColor: _accent,
               foregroundColor: Colors.white,
               elevation: 0,
-              disabledBackgroundColor: const Color(0xFFE2E8F0),
-              disabledForegroundColor: const Color(0xFF94A3B8),
+              disabledBackgroundColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+              disabledForegroundColor: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
             ),
             onPressed: selectedBytes != null ? onGenerateTimetable : null,
             child: const Row(

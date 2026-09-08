@@ -191,5 +191,95 @@ void main() {
       expect(scores['totalWeight'], closeTo(15.0, 0.001));
       expect(scores['obtained'], closeTo(13.375, 0.001));
     });
+
+    test('Does NOT drop rows when weightage is zero or unassigned', () {
+      final section = MarksSection(
+        sectionName: 'Quiz',
+        itemLabel: 'Quiz',
+        rows: const [
+          MarksRow(
+            itemNo: '1',
+            weightage: '0',
+            obtained: '0.5',
+            total: '5',
+            average: '2.85',
+            stdDev: '',
+            minimum: '0',
+            maximum: '5',
+          ),
+          MarksRow(
+            itemNo: '2',
+            weightage: '0',
+            obtained: '-',
+            total: '0',
+            average: '',
+            stdDev: '',
+            minimum: '',
+            maximum: '',
+          ),
+          MarksRow(
+            itemNo: '3',
+            weightage: '0',
+            obtained: '-',
+            total: '0',
+            average: '',
+            stdDev: '',
+            minimum: '',
+            maximum: '',
+          ),
+        ],
+      );
+
+      final active = section.activeItemRows;
+      expect(active.length, 3);
+      for (final row in section.rows) {
+        expect(section.isRowDropped(row), isFalse);
+      }
+    });
+
+    test('Does NOT drop rows when total item weight equals category weight', () {
+      final section = MarksSection(
+        sectionName: 'Quiz',
+        itemLabel: 'Quiz',
+        rows: const [
+          MarksRow(
+            itemNo: '1',
+            weightage: '5',
+            obtained: '4',
+            total: '10',
+            average: '5',
+            stdDev: '-',
+            minimum: '0',
+            maximum: '10',
+          ),
+          MarksRow(
+            itemNo: '2',
+            weightage: '5',
+            obtained: '8',
+            total: '10',
+            average: '6',
+            stdDev: '-',
+            minimum: '0',
+            maximum: '10',
+          ),
+          MarksRow(
+            itemNo: 'Quiz # Total',
+            weightage: '10',
+            obtained: '12',
+            total: '20',
+            average: '11',
+            stdDev: '-',
+            minimum: '0',
+            maximum: '20',
+          ),
+        ],
+      );
+
+      final active = section.activeItemRows;
+      expect(active.length, 2);
+      expect(section.isRowDropped(section.rows[0]), isFalse);
+      expect(section.isRowDropped(section.rows[1]), isFalse);
+      expect(section.isRowDropped(section.rows[2]), isFalse);
+    });
   });
 }

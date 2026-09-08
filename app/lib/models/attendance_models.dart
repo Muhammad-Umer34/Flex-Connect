@@ -138,11 +138,14 @@ class AttendanceCourse {
 class AttendanceSnapshot {
   const AttendanceSnapshot({
     required this.semester,
+    required this.semesters,
     required this.courses,
     required this.capturedAt,
   });
 
   final AttendanceSemester? semester;
+  /// All semester options from the #SemId dropdown on the attendance page.
+  final List<AttendanceSemester> semesters;
   final List<AttendanceCourse> courses;
   final DateTime? capturedAt;
 
@@ -161,6 +164,18 @@ class AttendanceSnapshot {
         semester = parsed;
       }
     }
+
+    final semestersJson = json['semesters'];
+    final semesters = semestersJson is List
+        ? semestersJson
+              .whereType<Map>()
+              .map(
+                (sem) =>
+                    AttendanceSemester.fromJson(sem.cast<String, dynamic>()),
+              )
+              .where((sem) => sem.id.isNotEmpty)
+              .toList(growable: false)
+        : const <AttendanceSemester>[];
 
     final coursesJson = json['courses'];
     final courses = coursesJson is List
@@ -187,6 +202,7 @@ class AttendanceSnapshot {
 
     return AttendanceSnapshot(
       semester: semester,
+      semesters: semesters,
       courses: courses,
       capturedAt: capturedAt,
     );

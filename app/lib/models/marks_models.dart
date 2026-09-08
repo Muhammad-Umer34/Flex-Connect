@@ -66,52 +66,65 @@ class MarksSection {
       if (isTotalRow) {
         grandTotalRow = row;
       } else {
-        final double? w = double.tryParse(row.weightage.trim());
-        final double? t = double.tryParse(row.total.trim());
-        if (w != null && w > 0 && t != null && t > 0) {
-          items.add(row);
-        }
+        items.add(row);
       }
     }
 
     if (items.isEmpty) return const [];
 
     double totalItemWeight = 0.0;
+    double? positiveItemWeight;
+    int positiveWeightItemCount = 0;
     for (final item in items) {
-      totalItemWeight += double.tryParse(item.weightage.trim()) ?? 0.0;
+      final w = double.tryParse(item.weightage.trim());
+      if (w != null && w > 0) {
+        totalItemWeight += w;
+        positiveItemWeight ??= w;
+        positiveWeightItemCount++;
+      }
     }
 
     double? categoryWeight;
     if (grandTotalRow != null) {
       final w = double.tryParse(grandTotalRow.weightage.replaceAll('%', '').trim());
       final t = double.tryParse(grandTotalRow.total.replaceAll('%', '').trim());
-      categoryWeight = w ?? t;
+      categoryWeight = (w != null && w > 0) ? w : ((t != null && t > 0) ? t : null);
     }
 
-    if (categoryWeight != null && totalItemWeight > categoryWeight) {
+    if (categoryWeight != null &&
+        categoryWeight > 0 &&
+        totalItemWeight > categoryWeight &&
+        positiveItemWeight != null &&
+        positiveItemWeight > 0 &&
+        positiveWeightItemCount > 0) {
       final double excessWeight = totalItemWeight - categoryWeight;
-      final double weightPerItem = double.tryParse(items.first.weightage.trim()) ?? 1.0;
-      
-      if (weightPerItem > 0) {
-        final int dropCount = (excessWeight / weightPerItem).round();
-        final int bestOfCount = items.length - dropCount;
+      final int dropCount = (excessWeight / positiveItemWeight).round();
+      final int bestOfCount = positiveWeightItemCount - dropCount;
 
-        if (bestOfCount > 0 && bestOfCount < items.length) {
-          // Sort items by score descending
-          final sortedItems = List<MarksRow>.from(items);
-          sortedItems.sort((a, b) {
-            final aObt = double.tryParse(a.obtained.trim()) ?? 0.0;
-            final aTot = double.tryParse(a.total.trim()) ?? 1.0;
-            final aPct = aTot > 0 ? aObt / aTot : 0.0;
+      if (bestOfCount > 0 && bestOfCount < positiveWeightItemCount) {
+        final positiveItems = items.where((item) {
+          final w = double.tryParse(item.weightage.trim());
+          return w != null && w > 0;
+        }).toList();
 
-            final bObt = double.tryParse(b.obtained.trim()) ?? 0.0;
-            final bTot = double.tryParse(b.total.trim()) ?? 1.0;
-            final bPct = bTot > 0 ? bObt / bTot : 0.0;
+        final otherItems = items.where((item) {
+          final w = double.tryParse(item.weightage.trim());
+          return w == null || w <= 0;
+        }).toList();
 
-            return bPct.compareTo(aPct); // Descending order
-          });
-          return sortedItems.take(bestOfCount).toList();
-        }
+        positiveItems.sort((a, b) {
+          final aObt = double.tryParse(a.obtained.trim()) ?? 0.0;
+          final aTot = double.tryParse(a.total.trim()) ?? 1.0;
+          final aPct = aTot > 0 ? aObt / aTot : 0.0;
+
+          final bObt = double.tryParse(b.obtained.trim()) ?? 0.0;
+          final bTot = double.tryParse(b.total.trim()) ?? 1.0;
+          final bPct = bTot > 0 ? bObt / bTot : 0.0;
+
+          return bPct.compareTo(aPct); // Descending order
+        });
+
+        return [...positiveItems.take(bestOfCount), ...otherItems];
       }
     }
 
@@ -121,8 +134,18 @@ class MarksSection {
   bool isRowDropped(MarksRow row) {
     final isTotalRow = row.itemNo.trim().isEmpty || row.itemNo.toLowerCase().contains('total');
     if (isTotalRow) return false;
+
+    final allItems = rows.where((r) {
+      final isTot = r.itemNo.trim().isEmpty || r.itemNo.toLowerCase().contains('total');
+      return !isTot;
+    }).toList();
+
     final active = activeItemRows;
-    return !active.any((r) => r.itemNo == row.itemNo);
+    if (active.length < allItems.length) {
+      return !active.any((r) => r.itemNo == row.itemNo);
+    }
+
+    return false;
   }
 
   factory MarksSection.fromJson(Map<String, dynamic> json) {

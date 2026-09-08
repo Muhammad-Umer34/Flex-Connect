@@ -167,6 +167,17 @@ class _HomeScreenState extends State<HomeScreen> {
       }
       // Sort in descending order of code (latest semester first)
       options.sort((a, b) => int.parse(b['code']!).compareTo(int.parse(a['code']!)));
+    } else if (_attendanceSnapshot != null && _attendanceSnapshot!.semesters.isNotEmpty) {
+      final seenCodes = <String>{};
+      for (final sem in _attendanceSnapshot!.semesters) {
+        final code = sem.id.trim();
+        final name = sem.name.trim();
+        if (code.isNotEmpty && !seenCodes.contains(code)) {
+          seenCodes.add(code);
+          options.add({'name': name.isNotEmpty ? name : 'Semester $code', 'code': code});
+        }
+      }
+      options.sort((a, b) => (int.tryParse(b['code']!) ?? 0).compareTo(int.tryParse(a['code']!) ?? 0));
     } else {
       // First-time users before sync: show a generic loading placeholder
       options.add({'name': 'Latest Semester', 'code': ''});
@@ -678,7 +689,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
                     width: double.infinity,
                     child: Text(
-                      'Solve the reCAPTCHA above to proceed with data synchronization.',
+                      'Complete the verification challenge above to proceed with data synchronization.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 11,

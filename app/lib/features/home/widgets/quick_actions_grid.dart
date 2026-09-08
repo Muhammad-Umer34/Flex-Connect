@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../timetable/timetable_screen.dart';
+import '../../timetable/today_timetable_screen.dart';
 import '../../more/free_room_finder_screen.dart';
 import '../../more/datesheet_screen.dart';
 import '../../more/absolute_grading_calculator_screen.dart';
@@ -23,7 +24,7 @@ class QuickActionsGrid extends StatelessWidget {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const TimetableScreen()),
+            MaterialPageRoute(builder: (_) => const TodayTimetableScreen()),
           );
         },
       ),

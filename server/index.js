@@ -97,7 +97,7 @@ async function handleUniversityLogin(req, res) {
     session.browser = browser;
     session.page = page;
     session.status = "captcha_required";
-    session.message = "Username and password are filled. Solve the reCAPTCHA below those fields in the opened browser window, then submit the form there.";
+    session.message = "Username and password are filled. Complete the verification challenge below those fields in the opened browser window, then submit the form there.";
 
     await page.goto("https://flexstudent.nu.edu.pk/Login", {
       waitUntil: "domcontentloaded"

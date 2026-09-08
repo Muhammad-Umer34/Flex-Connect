@@ -1,10 +1,13 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:home_widget/home_widget.dart';
 import '../navigation/main_screen.dart';
+import '../timetable/today_timetable_screen.dart';
 import '../../services/update_service.dart';
 import 'onboarding_screen.dart';
 
@@ -12,6 +15,7 @@ class AppEntry extends StatefulWidget {
   const AppEntry({super.key});
 
   static final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier<ThemeMode>(ThemeMode.system);
+  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   @override
   State<AppEntry> createState() => _AppEntryState();
@@ -29,15 +33,36 @@ class _AppEntryState extends State<AppEntry> {
   bool _onboardingCompleted = false;
   bool _isSaving = false;
   bool _obscurePassword = true;
+  StreamSubscription<Uri?>? _widgetSubscription;
 
   @override
   void initState() {
     super.initState();
     _loadCredentialsState();
+    _initHomeWidgetListener();
+  }
+
+  void _initHomeWidgetListener() {
+    HomeWidget.initiallyLaunchedFromHomeWidget().then(_handleWidgetLaunch);
+    _widgetSubscription = HomeWidget.widgetClicked.listen(_handleWidgetLaunch);
+  }
+
+  void _handleWidgetLaunch(Uri? uri) {
+    if (uri == null) return;
+    if (uri.host == 'today_timetable' ||
+        uri.path.contains('today_timetable') ||
+        uri.scheme == 'flexconnect') {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        AppEntry.navigatorKey.currentState?.push(
+          MaterialPageRoute(builder: (_) => const TodayTimetableScreen()),
+        );
+      });
+    }
   }
 
   @override
   void dispose() {
+    _widgetSubscription?.cancel();
     _rollNumberController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -143,6 +168,7 @@ class _AppEntryState extends State<AppEntry> {
 
   Widget _buildMaterialApp(Widget home, ThemeMode currentThemeMode) {
     return MaterialApp(
+      navigatorKey: AppEntry.navigatorKey,
       title: 'Flex Connect',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(

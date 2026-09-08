@@ -42,12 +42,9 @@ class _TimetableScreenState extends State<TimetableScreen> {
 
 
 
-  // Custom Timetable & Search States
+  // Custom Timetable States
   List<TimetableDayEvent> _customEvents = [];
   int _activeTab = 0; // 0 = Grid, 1 = Planner
-  final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = '';
-  String? _searchedCourseName;
   final GlobalKey _gridBoundaryKey = GlobalKey();
 
   static const Color _accent = Color(0xFF2563EB); // Royal Blue
@@ -81,7 +78,6 @@ class _TimetableScreenState extends State<TimetableScreen> {
 
   @override
   void dispose() {
-    _searchController.dispose();
     _sectionInputController.dispose();
     super.dispose();
   }
@@ -381,9 +377,12 @@ class _TimetableScreenState extends State<TimetableScreen> {
             Container(
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
-                color: const Color(0xFFEFF6FF),
+                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: const Color(0xFFBFDBFE), width: 1),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF334155) : const Color(0xFFBFDBFE),
+                  width: 1,
+                ),
               ),
               child: const Icon(
                 Icons.calendar_today_outlined,
@@ -392,10 +391,10 @@ class _TimetableScreenState extends State<TimetableScreen> {
               ),
             ),
             const SizedBox(width: 8),
-            const Text(
+            Text(
               'Academic Timetable',
               style: TextStyle(
-                color: Color(0xFF1E3A8A),
+                color: isDark ? const Color(0xFF93C5FD) : const Color(0xFF1E3A8A),
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
@@ -404,15 +403,20 @@ class _TimetableScreenState extends State<TimetableScreen> {
         ),
         if (_step == 4)
           IconButton(
-            icon: const Icon(Icons.refresh, color: _muted),
+            icon: Icon(Icons.refresh, color: isDark ? Colors.grey[400] : _muted),
             tooltip: 'Upload New Timetable',
             onPressed: () {
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: const Text('Reset Timetable'),
-                  content: const Text(
+                  backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+                  title: Text(
+                    'Reset Timetable',
+                    style: TextStyle(color: isDark ? Colors.white : _ink),
+                  ),
+                  content: Text(
                     'Are you sure you want to upload a new Excel file? This will overwrite your current timetable.',
+                    style: TextStyle(color: isDark ? Colors.grey[300] : _muted),
                   ),
                   actions: [
                     TextButton(
@@ -437,6 +441,9 @@ class _TimetableScreenState extends State<TimetableScreen> {
   }
 
   Widget _buildTitleSection(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     String title = 'Timetable';
     String subtitle = 'STEP 1 OF 2 • CONFIGURE EXCEL';
     
@@ -456,8 +463,8 @@ class _TimetableScreenState extends State<TimetableScreen> {
       children: [
         Text(
           title,
-          style: const TextStyle(
-            color: _ink,
+          style: TextStyle(
+            color: isDark ? Colors.white : _ink,
             fontSize: 36,
             fontWeight: FontWeight.w400,
             letterSpacing: -0.5,
@@ -466,8 +473,8 @@ class _TimetableScreenState extends State<TimetableScreen> {
         const SizedBox(height: 6),
         Text(
           subtitle.toUpperCase(),
-          style: const TextStyle(
-            color: Color(0xFFB45309),
+          style: TextStyle(
+            color: isDark ? const Color(0xFFF59E0B) : const Color(0xFFB45309),
             fontSize: 11,
             fontWeight: FontWeight.w700,
             letterSpacing: 1.5,
@@ -483,24 +490,28 @@ class _TimetableScreenState extends State<TimetableScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF0F172A) : Colors.white,
       body: SafeArea(
         bottom: false,
         child: _isLoading
-            ? const Center(
+            ? Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircularProgressIndicator(color: _accent),
-                    SizedBox(height: 16),
+                    const CircularProgressIndicator(color: _accent),
+                    const SizedBox(height: 16),
                     Text(
                       'Processing your spreadsheet...',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: _ink),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: isDark ? Colors.white : _ink,
+                      ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
                       'This might take a moment.',
-                      style: TextStyle(color: _muted),
+                      style: TextStyle(color: isDark ? Colors.grey[400] : _muted),
                     ),
                   ],
                 ),
@@ -549,9 +560,16 @@ class _TimetableScreenState extends State<TimetableScreen> {
             // Selection summary card
             Container(
               decoration: BoxDecoration(
-                color: deptColor.withValues(alpha: 0.05),
+                color: isDark
+                    ? const Color(0xFF1E293B)
+                    : deptColor.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: deptColor.withValues(alpha: 0.15), width: 1),
+                border: Border.all(
+                  color: isDark
+                      ? const Color(0xFF334155)
+                      : deptColor.withValues(alpha: 0.15),
+                  width: 1,
+                ),
               ),
               padding: const EdgeInsets.all(16),
               child: Row(
@@ -559,7 +577,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: deptColor.withValues(alpha: 0.1),
+                      color: deptColor.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(Icons.school, color: deptColor, size: 28),
@@ -571,12 +589,19 @@ class _TimetableScreenState extends State<TimetableScreen> {
                       children: [
                         Text(
                           _selectedSection!,
-                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: _ink),
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : _ink,
+                          ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           '${getDeptFullName(_selectedDept ?? '')} • ${_snapshot!.campus}',
-                          style: const TextStyle(color: _muted, fontSize: 12),
+                          style: TextStyle(
+                            color: isDark ? const Color(0xFF94A3B8) : _muted,
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ),
@@ -590,7 +615,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
             Container(
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
-                color: const Color(0xFFF1F5F9),
+                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -601,12 +626,14 @@ class _TimetableScreenState extends State<TimetableScreen> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         decoration: BoxDecoration(
-                          color: _activeTab == 0 ? Colors.white : Colors.transparent,
+                          color: _activeTab == 0
+                              ? (isDark ? const Color(0xFF334155) : Colors.white)
+                              : Colors.transparent,
                           borderRadius: BorderRadius.circular(8),
                           boxShadow: _activeTab == 0
                               ? [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.05),
+                                    color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
                                     blurRadius: 4,
                                     offset: const Offset(0, 2),
                                   )
@@ -617,7 +644,9 @@ class _TimetableScreenState extends State<TimetableScreen> {
                         child: Text(
                           'Weekly Grid',
                           style: TextStyle(
-                            color: _activeTab == 0 ? _ink : _muted,
+                            color: _activeTab == 0
+                                ? (isDark ? Colors.white : _ink)
+                                : (isDark ? const Color(0xFF94A3B8) : _muted),
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                           ),
@@ -631,12 +660,14 @@ class _TimetableScreenState extends State<TimetableScreen> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         decoration: BoxDecoration(
-                          color: _activeTab == 1 ? Colors.white : Colors.transparent,
+                          color: _activeTab == 1
+                              ? (isDark ? const Color(0xFF334155) : Colors.white)
+                              : Colors.transparent,
                           borderRadius: BorderRadius.circular(8),
                           boxShadow: _activeTab == 1
                               ? [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.05),
+                                    color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
                                     blurRadius: 4,
                                     offset: const Offset(0, 2),
                                   )
@@ -647,7 +678,9 @@ class _TimetableScreenState extends State<TimetableScreen> {
                         child: Text(
                           'Customize & Search',
                           style: TextStyle(
-                            color: _activeTab == 1 ? _ink : _muted,
+                            color: _activeTab == 1
+                                ? (isDark ? Colors.white : _ink)
+                                : (isDark ? const Color(0xFF94A3B8) : _muted),
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                           ),
@@ -668,7 +701,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
                     selectedSection: _selectedSection,
                     snapshot: _snapshot,
                     onExportGridToGallery: _exportGridToGallery,
-                    onEventPressed: _showEventDetailsBottomSheet,
+                    onEventPressed: (event) => _showEventDetailsBottomSheet(event, isDark),
                   )
                 : TimetablePlannerView(
                     selectedDept: _selectedDept,
@@ -699,11 +732,12 @@ class _TimetableScreenState extends State<TimetableScreen> {
     }
   }
 
-  void _showEventDetailsBottomSheet(TimetableDayEvent event) {
+  void _showEventDetailsBottomSheet(TimetableDayEvent event, bool isDark) {
     final deptColor = getDeptColor(event.section.split('-')[0]);
 
     showModalBottomSheet(
       context: context,
+      backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -721,7 +755,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: deptColor.withValues(alpha: 0.1),
+                        color: deptColor.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
@@ -730,7 +764,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close),
+                      icon: Icon(Icons.close, color: isDark ? Colors.grey[400] : Colors.grey[700]),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ],
@@ -738,38 +772,52 @@ class _TimetableScreenState extends State<TimetableScreen> {
                 const SizedBox(height: 12),
                 Text(
                   event.course,
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : _ink,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    const Icon(Icons.access_time, color: Colors.grey, size: 20),
+                    Icon(Icons.access_time, color: isDark ? Colors.grey[400] : Colors.grey, size: 20),
                     const SizedBox(width: 8),
                     Text(
                       '${event.day} • ${event.time}',
-                      style: const TextStyle(fontSize: 15),
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: isDark ? const Color(0xFFCBD5E1) : Colors.black87,
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    const Icon(Icons.room, color: Colors.grey, size: 20),
+                    Icon(Icons.room, color: isDark ? Colors.grey[400] : Colors.grey, size: 20),
                     const SizedBox(width: 8),
                     Text(
                       'Room: ${event.room}',
-                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: isDark ? const Color(0xFFCBD5E1) : Colors.black87,
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    const Icon(Icons.person, color: Colors.grey, size: 20),
+                    Icon(Icons.person, color: isDark ? Colors.grey[400] : Colors.grey, size: 20),
                     const SizedBox(width: 8),
                     Text(
                       'Teacher: ${event.teacher}',
-                      style: const TextStyle(fontSize: 15),
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: isDark ? const Color(0xFFCBD5E1) : Colors.black87,
+                      ),
                     ),
                   ],
                 ),
@@ -779,12 +827,14 @@ class _TimetableScreenState extends State<TimetableScreen> {
                   height: 48,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red.shade50,
-                      foregroundColor: Colors.red,
+                      backgroundColor: isDark ? const Color(0xFF7F1D1D).withValues(alpha: 0.3) : Colors.red.shade50,
+                      foregroundColor: isDark ? const Color(0xFFFCA5A5) : Colors.red,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(color: Colors.red.shade200),
+                        side: BorderSide(
+                          color: isDark ? const Color(0xFF991B1B) : Colors.red.shade200,
+                        ),
                       ),
                     ),
                     onPressed: () async {

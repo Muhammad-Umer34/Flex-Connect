@@ -729,6 +729,49 @@ class _UniversityLoginWebViewScreenState
 
       final preferences = await SharedPreferences.getInstance();
       await preferences.setString(_attendanceDataKey, jsonEncode(decoded));
+
+      // Fallback Semester Detection: If flex_selected_sync_semester is empty (e.g. freshers with no transcript history),
+      // extract active semester ID from the #SemId dropdown captured on Attendance page.
+      final existingSem = preferences.getString('flex_selected_sync_semester');
+      if (existingSem == null || existingSem.isEmpty) {
+        String? activeSemId;
+        final selectedSem = decoded['selectedSemester'];
+        if (selectedSem is Map<String, dynamic>) {
+          final id = selectedSem['id'] as String?;
+          if (id != null && id.trim().isNotEmpty) {
+            activeSemId = id.trim();
+          }
+        }
+
+        if (activeSemId == null || activeSemId.isEmpty) {
+          final semesters = decoded['semesters'];
+          if (semesters is List) {
+            for (final sem in semesters) {
+              if (sem is Map<String, dynamic>) {
+                final id = sem['id'] as String?;
+                final isSel = sem['selected'] == true;
+                if (isSel && id != null && id.trim().isNotEmpty) {
+                  activeSemId = id.trim();
+                  break;
+                }
+              }
+            }
+            if ((activeSemId == null || activeSemId.isEmpty) && semesters.isNotEmpty) {
+              final lastSem = semesters.last;
+              if (lastSem is Map<String, dynamic>) {
+                final id = lastSem['id'] as String?;
+                if (id != null && id.trim().isNotEmpty) {
+                  activeSemId = id.trim();
+                }
+              }
+            }
+          }
+        }
+
+        if (activeSemId != null && activeSemId.isNotEmpty) {
+          await preferences.setString('flex_selected_sync_semester', activeSemId);
+        }
+      }
     } catch (_) {
       // Intentionally ignored: attendance table can render after page-finished.
     }
@@ -803,7 +846,12 @@ class _UniversityLoginWebViewScreenState
             return true;
           }
         }
-        return false;
+        // For freshers with zero completed course rows on their transcript, check if page layout has loaded
+        const isPageLoaded = document.querySelector('.m-portlet') !== null ||
+                             document.querySelector('.m-content') !== null ||
+                             document.querySelector('#m_header_topbar') !== null ||
+                             document.querySelector('.m-page-head') !== null;
+        return isPageLoaded;
       })();
     ''');
 
@@ -1235,7 +1283,12 @@ class _UniversityLoginWebViewScreenState
     return _controller
         .runJavaScriptReturningResult('''
       (function() {
-        const captcha = document.querySelector('.g-recaptcha');
+        const captcha = document.querySelector('.cf-turnstile') ||
+                        document.querySelector('.g-recaptcha') ||
+                        document.querySelector('[data-sitekey]') ||
+                        document.querySelector('iframe[src*="cloudflare"]') ||
+                        document.querySelector('iframe[src*="turnstile"]') ||
+                        document.querySelector('iframe[src*="recaptcha"]');
         if (!captcha) {
           return false;
         }
@@ -1246,7 +1299,7 @@ class _UniversityLoginWebViewScreenState
 
         const style = document.createElement('style');
         style.id = 'flex-captcha-only-style';
-        const isRecaptchaElement = (element) => {
+        const isCaptchaElement = (element) => {
           if (!element || element === document.body || element === document.documentElement) {
             return true;
           }
@@ -1259,16 +1312,30 @@ class _UniversityLoginWebViewScreenState
             return true;
           }
 
-          if (element.tagName === 'IFRAME') {
-            const src = (element.getAttribute('src') || '').toLowerCase();
-            const title = (element.getAttribute('title') || '').toLowerCase();
-            if (src.includes('recaptcha') || title.includes('recaptcha')) {
+          if (element.tagName === 'INPUT') {
+            const name = (element.getAttribute('name') || '').toLowerCase();
+            const id = (element.getAttribute('id') || '').toLowerCase();
+            if (name.includes('turnstile') || name.includes('recaptcha') || id.includes('turnstile') || id.includes('recaptcha') || id.includes('cf-chl')) {
               return true;
             }
           }
 
-          if (element.tagName === 'DIV') {
-            const iframe = element.querySelector('iframe[src*="recaptcha"], iframe[title*="recaptcha"]');
+          if (element.tagName === 'IFRAME') {
+            const src = (element.getAttribute('src') || '').toLowerCase();
+            const title = (element.getAttribute('title') || '').toLowerCase();
+            if (src.includes('recaptcha') || title.includes('recaptcha') || src.includes('cloudflare') || src.includes('turnstile') || title.includes('cloudflare') || title.includes('turnstile') || title.includes('challenge')) {
+              return true;
+            }
+          }
+
+          if (element.tagName === 'DIV' || element.tagName === 'SPAN' || element.tagName === 'FORM') {
+            if (element.classList && (element.classList.contains('cf-turnstile') || element.classList.contains('g-recaptcha'))) {
+              return true;
+            }
+            if (element.hasAttribute && element.hasAttribute('data-sitekey')) {
+              return true;
+            }
+            const iframe = element.querySelector('iframe[src*="recaptcha"], iframe[title*="recaptcha"], iframe[src*="cloudflare"], iframe[src*="turnstile"], iframe[title*="cloudflare"], iframe[title*="turnstile"], iframe[title*="challenge"]');
             if (iframe) {
               return true;
             }
@@ -1277,24 +1344,24 @@ class _UniversityLoginWebViewScreenState
           return false;
         };
 
-        const revealRecaptchaElements = () => {
-          // Hide all elements that are not part of the recaptcha system
+        const revealCaptchaElements = () => {
+          // Hide all elements that are not part of the captcha system
           document.querySelectorAll('body *').forEach((element) => {
-            if (isRecaptchaElement(element)) {
+            if (isCaptchaElement(element)) {
               return;
             }
 
             element.style.setProperty('display', 'none', 'important');
           });
 
-          // Style and show the recaptcha elements and their ancestors
-          document.querySelectorAll('.g-recaptcha, iframe[src*="recaptcha"], iframe[title*="recaptcha"]').forEach((element) => {
+          // Style and show the captcha elements and their ancestors
+          document.querySelectorAll('.cf-turnstile, .g-recaptcha, [data-sitekey], iframe[src*="recaptcha"], iframe[title*="recaptcha"], iframe[src*="cloudflare"], iframe[src*="turnstile"], iframe[title*="cloudflare"], iframe[title*="turnstile"], iframe[title*="challenge"]').forEach((element) => {
             let node = element;
             while (node) {
               if (node !== document.body && node !== document.documentElement) {
                 // Check if this node is the wrapper parent of a challenge iframe
-                const challengeIframe = document.querySelector('iframe[src*="bframe"], iframe[title*="challenge"]');
-                const isChallengeWrapper = challengeIframe && node === challengeIframe.parentElement;
+                const challengeIframe = document.querySelector('iframe[src*="bframe"], iframe[title*="challenge"], iframe[src*="challenges.cloudflare.com"]');
+                const isChallengeWrapper = challengeIframe && (node === challengeIframe.parentElement || node === challengeIframe);
 
                 if (isChallengeWrapper) {
                   node.style.setProperty('display', 'block', 'important');
@@ -1356,20 +1423,21 @@ class _UniversityLoginWebViewScreenState
             height: 100% !important;
           }
 
-          #g-recaptcha-response {
+          #g-recaptcha-response, input[name="g-recaptcha-response"], input[name="cf-turnstile-response"] {
             display: none !important;
           }
         `;
         document.head.appendChild(style);
 
-        revealRecaptchaElements();
+        revealCaptchaElements();
 
         captcha.style.cssText = [
           'display:block',
           'visibility:visible',
           'position:relative',
           'margin:0 auto',
-          'z-index:1'
+          'z-index:1',
+          'min-height:65px'
         ].join(' !important;') + ' !important;';
 
         document.body.style.setProperty('background', '#ffffff', 'important');
@@ -1382,9 +1450,9 @@ class _UniversityLoginWebViewScreenState
         document.body.style.setProperty('margin', '0', 'important');
         document.documentElement.style.setProperty('background', '#ffffff', 'important');
 
-        if (!window.flexRecaptchaObserver) {
-          window.flexRecaptchaObserver = new MutationObserver(revealRecaptchaElements);
-          window.flexRecaptchaObserver.observe(document.body, {
+        if (!window.flexCaptchaObserver) {
+          window.flexCaptchaObserver = new MutationObserver(revealCaptchaElements);
+          window.flexCaptchaObserver.observe(document.body, {
             childList: true,
             subtree: true
           });
@@ -1405,16 +1473,48 @@ class _UniversityLoginWebViewScreenState
 
     await _controller.runJavaScript('''
       (function() {
-        const form = document.getElementById('frmlogin');
-        const captchaResponse = document.getElementById('g-recaptcha-response');
-        const submitButton = document.getElementById('m_login_signin_submit');
+        const form = document.getElementById('frmlogin') || document.querySelector('form');
+        const submitButton = document.getElementById('m_login_signin_submit') || (form ? form.querySelector('button[type="submit"]') : null);
 
-        if (!form || !captchaResponse || !submitButton) {
+        if (!form || !submitButton) {
           return;
         }
 
+        const getCaptchaToken = () => {
+          // 1. Check Cloudflare Turnstile response input
+          const cfInput = document.querySelector('input[name="cf-turnstile-response"]');
+          if (cfInput && cfInput.value && cfInput.value.trim().length > 0) {
+            return cfInput.value.trim();
+          }
+
+          // 2. Check Google reCAPTCHA response input
+          const recaptchaInput = document.querySelector('#g-recaptcha-response, input[name="g-recaptcha-response"]');
+          if (recaptchaInput && recaptchaInput.value && recaptchaInput.value.trim().length > 0) {
+            return recaptchaInput.value.trim();
+          }
+
+          // 3. Check Turnstile JS API
+          try {
+            if (window.turnstile && typeof window.turnstile.getResponse === 'function') {
+              const resp = window.turnstile.getResponse();
+              if (resp && resp.trim().length > 0) return resp.trim();
+            }
+          } catch (e) {}
+
+          // 4. Check reCAPTCHA JS API
+          try {
+            if (window.grecaptcha && typeof window.grecaptcha.getResponse === 'function') {
+              const resp = window.grecaptcha.getResponse();
+              if (resp && resp.trim().length > 0) return resp.trim();
+            }
+          } catch (e) {}
+
+          return '';
+        };
+
         const submitWhenSolved = () => {
-          if (captchaResponse.value && !submitButton.dataset.flexAutoSubmitted) {
+          const token = getCaptchaToken();
+          if (token && !submitButton.dataset.flexAutoSubmitted) {
             submitButton.dataset.flexAutoSubmitted = 'true';
             submitButton.click();
           }
@@ -1423,9 +1523,22 @@ class _UniversityLoginWebViewScreenState
         submitWhenSolved();
 
         const observer = new MutationObserver(submitWhenSolved);
-        observer.observe(captchaResponse, { attributes: true, attributeFilter: ['value'] });
+        observer.observe(form, { childList: true, subtree: true, attributes: true, attributeFilter: ['value'] });
 
-        const timer = setInterval(submitWhenSolved, 1000);
+        const observeInputs = () => {
+          document.querySelectorAll('input[name="cf-turnstile-response"], #g-recaptcha-response, input[name="g-recaptcha-response"]').forEach((inp) => {
+            if (!inp.dataset.flexObserved) {
+              inp.dataset.flexObserved = 'true';
+              observer.observe(inp, { attributes: true, attributeFilter: ['value'] });
+            }
+          });
+        };
+        observeInputs();
+
+        const timer = setInterval(() => {
+          observeInputs();
+          submitWhenSolved();
+        }, 300);
 
         form.addEventListener('submit', () => {
           clearInterval(timer);

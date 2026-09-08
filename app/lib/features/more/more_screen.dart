@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/marks_storage.dart';
 import '../../main.dart';
 import '../timetable/timetable_screen.dart';
+import '../timetable/today_timetable_screen.dart';
 import 'past_papers_screen.dart';
 import 'absolute_grading_calculator_screen.dart';
 import 'relative_grading_calculator_screen.dart';
@@ -122,6 +123,21 @@ class MoreScreen extends StatelessWidget {
           _buildCategoryContainer(
             isDark: isDark,
             children: [
+              _buildModernTile(
+                context: context,
+                icon: Icons.schedule_rounded,
+                iconColor: const Color(0xFF2563EB),
+                title: "Today's Timetable",
+                subtitle: 'Live class timeline & daily schedule',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const TodayTimetableScreen()),
+                  );
+                },
+                showDivider: true,
+              ),
+
               _buildModernTile(
                 context: context,
                 icon: Icons.calendar_month_rounded,

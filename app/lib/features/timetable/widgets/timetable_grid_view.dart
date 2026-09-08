@@ -227,6 +227,14 @@ class TimetableGridView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final textInk = isDark ? Colors.white : _ink;
+    final textMuted = isDark ? const Color(0xFF94A3B8) : _muted;
+    final cardBorder = isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9);
+    final headerBg = isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC);
+
     final blockTimes = [
       "08:30-10:00",
       "10:00-11:30",
@@ -262,16 +270,16 @@ class TimetableGridView extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 60),
           child: Column(
             children: [
-              Icon(Icons.event_busy, size: 48, color: Colors.grey.withValues(alpha: 0.5)),
+              Icon(Icons.event_busy, size: 48, color: textMuted.withValues(alpha: 0.5)),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 'Timetable is Empty',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: _muted),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: textMuted),
               ),
               const SizedBox(height: 4),
-              const Text(
+              Text(
                 'Go to "Customize & Search" tab to add classes.',
-                style: TextStyle(color: _muted, fontSize: 13),
+                style: TextStyle(color: textMuted, fontSize: 13),
               ),
             ],
           ),
@@ -285,24 +293,24 @@ class TimetableGridView extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Weekly Schedule Grid',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _ink),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textInk),
                   ),
                   Text(
                     'Scroll horizontally to see all periods. Tap any class to view details.',
-                    style: TextStyle(fontSize: 11, color: _muted),
+                    style: TextStyle(fontSize: 11, color: textMuted),
                   ),
                 ],
               ),
             ),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFEFF6FF),
+                backgroundColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
                 foregroundColor: _accent,
                 elevation: 0,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -322,7 +330,7 @@ class TimetableGridView extends StatelessWidget {
             child: RepaintBoundary(
               key: gridBoundaryKey,
               child: Container(
-                color: Colors.white,
+                color: isDark ? const Color(0xFF1E293B) : Colors.white,
                 padding: const EdgeInsets.all(24),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -336,10 +344,10 @@ class TimetableGridView extends StatelessWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'FLEX CONNECT',
                               style: TextStyle(
-                                color: _ink,
+                                color: textInk,
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: 1.5,
@@ -363,8 +371,8 @@ class TimetableGridView extends StatelessWidget {
                           children: [
                             Text(
                               'SECTION: ${selectedSection ?? "N/A"}',
-                              style: const TextStyle(
-                                color: _ink,
+                              style: TextStyle(
+                                color: textInk,
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -372,8 +380,8 @@ class TimetableGridView extends StatelessWidget {
                             const SizedBox(height: 2),
                             Text(
                               'Campus: ${snapshot?.campus ?? "N/A"}',
-                              style: const TextStyle(
-                                color: _muted,
+                              style: TextStyle(
+                                color: textMuted,
                                 fontSize: 10,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -386,30 +394,30 @@ class TimetableGridView extends StatelessWidget {
                     Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFF1F5F9)),
+                        border: Border.all(color: cardBorder),
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(12),
                         child: Table(
                           defaultColumnWidth: const FixedColumnWidth(140),
                           border: TableBorder.all(
-                            color: const Color(0xFFF1F5F9),
+                            color: cardBorder,
                             width: 0.8,
                           ),
                           children: [
                             // Header Row
                             TableRow(
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFF8FAFC),
+                              decoration: BoxDecoration(
+                                color: headerBg,
                               ),
                               children: [
-                                const TableCell(
+                                TableCell(
                                   child: Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+                                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
                                     child: Center(
                                       child: Text(
                                         'Day',
-                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: _ink),
+                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: textInk),
                                       ),
                                     ),
                                   ),
@@ -423,12 +431,12 @@ class TimetableGridView extends StatelessWidget {
                                           children: [
                                             Text(
                                               'Period ${idx + 1}',
-                                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: _ink),
+                                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: textInk),
                                             ),
                                             const SizedBox(height: 2),
                                             Text(
                                               blockTimes[idx],
-                                              style: const TextStyle(fontSize: 9, color: _muted, fontWeight: FontWeight.w500),
+                                              style: TextStyle(fontSize: 9, color: textMuted, fontWeight: FontWeight.w500),
                                             ),
                                           ],
                                         ),
@@ -446,11 +454,11 @@ class TimetableGridView extends StatelessWidget {
                                     verticalAlignment: TableCellVerticalAlignment.middle,
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
-                                      color: const Color(0xFFF8FAFC),
+                                      color: headerBg,
                                       child: Center(
                                         child: Text(
                                           day.substring(0, 3).toUpperCase(),
-                                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: _ink),
+                                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: textInk),
                                         ),
                                       ),
                                     ),
